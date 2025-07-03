@@ -167,3 +167,26 @@ main#recipe-list {
     cursor:pointer;
     text-decoration: none;
 }
+
+footer {
+    background-color: #ffe3dc;
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.9rem;
+    color: #6b4c3b;
+    border-top: 2px solid #ff918c;
+    margin-top: 2rem;
+}
+
+footer a {
+    color: #ff6f61;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.2s ease;
+}
+
+footer a:hover {
+    color: #d94f4f;
+    text-decoration: underline;
+}
+
