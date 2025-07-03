@@ -18,7 +18,7 @@ header {
 }
 
 .app-title {
-    font-size: 3rem;
+    font-size: 2.5rem;
     font-weight: bold;
     color: #ff6f61;
     margin: 0;
@@ -27,13 +27,16 @@ header {
 
 .search-wrapper {
     position: relative;
-    width: 90%;
+    width: 100%;
+    max-width: 600px;
+    padding: 0 1rem;
+    box-sizing: border-box;
 }
 
 .search-wrapper i.fa-magnifying-glass {
     position: absolute;
+    left: 1.75rem;
     top: 50%;
-    left: 16px;
     transform: translateY(-50%);
     color: #999;
     font-size: 1rem;
@@ -42,11 +45,12 @@ header {
 
 #search {
     width: 100%;
-    padding: 0.75rem 1rem 0.75rem 2.5rem; /* Add left padding for icon */
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
     border: none;
     border-radius: 25px;
     font-size: 1rem;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
 }
 
 #filters {
