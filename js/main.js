@@ -40,15 +40,15 @@ function createRecipeCard(recipe) {
         return hearts;
     }
 
-    const getUtensils = (count) => {
-        let utensils = '';
+    const getDifficulty = (count) => {
+        let difficulty = '';
         for (let i = 0; i < 5; i++) {
             if (i < count)
-                utensils += '<i class="fa-solid fa-star" style="margin-right: 2px;"></i>';
+                difficulty += '<i class="fa-solid fa-star" style="margin-right: 2px;"></i>';
             else 
-                utensils += '<i class="fa-regular fa-star" style="margin-right: 2px;"></i>';
+                difficulty += '<i class="fa-regular fa-star" style="margin-right: 2px;"></i>';
         }
-        return utensils;
+        return difficulty;
     }
 
     card.innerHTML = `
@@ -57,7 +57,7 @@ function createRecipeCard(recipe) {
             <div class="content">
                 <h3>${recipe.title}</h3>
                 <p>Note : ${getHearts(recipe.rating)}
-                <br>Difficulté : ${getUtensils(recipe.difficulty)}
+                <br>Difficulté : ${getDifficulty(recipe.difficulty)}
                 <br>Temps : ${recipe.time}
                 <br>Prix : ${recipe.price} / personne</p>
                 <div class="tags">
