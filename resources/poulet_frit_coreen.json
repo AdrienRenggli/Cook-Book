@@ -1,0 +1,36 @@
+{
+  "title": "Poulet Frit Coréen",
+  "rating": 5,
+  "difficulty": 4,
+  "price": 4.25,
+  "prepTime": "20 min",
+  "cookTime": "35 min",
+  "images": [
+    "resources/poulet_frit_coreen_1.jpg",
+    "resources/poulet_frit_coreen_2.jpg",
+    "resources/poulet_frit_coreen_3.jpg"
+  ],
+  "ingredients": [
+    { "name": "Ailes de poulet", "quantity": 225, "unit": "g", "price": 2.70 },
+    { "name": "Sel", "quantity": 1.5, "unit": "g", "price": 0 },
+    { "name": "Gingembre", "quantity": 2, "unit": "g", "price": 0.0122 },
+    { "name": "Amidon de maïs", "quantity": 10, "unit": "g", "price": 0.073 },
+    { "name": "Poivre noir", "quantity": 1, "unit": "", "price":  0},
+    { "name": "Ketchup", "quantity": 22.5, "unit": "g", "price":  0.165},
+    { "name": "Sambal", "quantity": 10, "unit": "g", "price":  0.18},
+    { "name": "Mirin", "quantity": 8.75, "unit": "g", "price":  0.2625},
+    { "name": "Sauce soja foncée", "quantity": 7.5, "unit": "g", "price":  0.087},
+    { "name": "Miel", "quantity": 10, "unit": "g", "price":  0.66},
+    { "name": "Sucre brun", "quantity": 3.75, "unit": "g", "price":  0.008625},
+    { "name": "Ail", "quantity": 1, "unit": "gousse", "price":  0.11},
+    { "name": "Vinaigre de riz", "quantity": 6, "unit": "g", "price":  0.1338},
+    { "name": "Huile végétale", "quantity": 1, "unit": "", "price":  2.5},
+    { "name": "Graines de sésam", "quantity": 1, "unit": "", "price":  0.05},
+    { "name": "Oignon nouveau", "quantity": 1, "unit": ".", "price":  0.6},
+    { "name": "Coriandre", "quantity": 1, "unit": ".", "price":  1.05}
+  ],
+  "instructions": "Couper les ailes en deux morceaux en les séparant à l'articulation. Mettre dans un bol et assaisonner avec le sel, le gingembre râpé et du poivre noir. Couvrir et laisser infuser 1 heure au frigo.\nPour la sauce, mélanger le ketchup, le sambal, le mirin, la sauce soja, le miel et le sucre brun. Dans une petite casserole, cuire à feu doux en remuant pendant 5 minutes.\nVerser cette sauce dans un bol et râper les gousses d'ails. Une fois tiède, ajouter le vinaigre de riz. Sortir les ailes du frigo, les sécher avec du papier à cuisine, puis less recouvrir généreusement d'amidon de maïs.\nRemplir une grande casserole à moitié avec de l'huile végétale et chauffer jusqu'à une température de 185°C. Frire les ailes pendant 3-4 minutes. Faites plusieurs fournées si vous avez trop d'ailes par rapport à votre casserole.\nLaisser refroidir une dizaine de minutes sur une grille placée au dessus d'un plateau.\nChauffer l'huile à 200°C et faire refrire les ailes pendant 4-5 minutes. Laisser couler l'excès d'huile sur la grille.\nMettre la sauce sur les ailes dans un bol et remuer pour bien recouvrir les ailes de tous les côtés. Servir en garnissant avec des graines de sésame, coriandre et des oignons verts.",
+  "tips": "La friture se fait en deux temps. Le premier bain vise à cuire la viande et le second à développer le croustillant. De plus, la friture se fait à 175°C mais pour cela on doit chauffer l'huile à 185°C qui refroidira une fois les ailes ajoutées. C'est le même principe pour le deuxième bain de friture dont la température visée est de 190°C.",
+  "cook": "Fringale",
+  "url": "https://180c.ch/"
+}

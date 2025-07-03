@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Recette</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        <link rel="stylesheet" href="css/recipe.css" />
+    </head>
+    <body>
+        <header>
+            <h1 id="recipe-title">Poulet Frit Coréen</h1>
+        </header>
+        <main class="recipe-container">
+            <aside class="info">
+                <div>
+                    <p><strong>Note :</strong> <span id="rating"></span></p>
+                    <p><strong>Difficulté :</strong> <span id="difficulty"></span></p>
+                    <p><strong>Prix :</strong> <span id="price"></span></p>
+                    <p><strong>Préparation :</strong> <span id="prep-time"></span></p>
+                    <p><strong>Cuisson :</strong> <span id="cook-time"></span></p>
+                    <p><strong>Personnes :</strong>
+                        <button onclick="changeGuests(-1)">-</button>
+                        <span id="guest-count">1</span>
+                        <button onclick="changeGuests(1)">+</button>
+                    </p>
+                </div>
+                <div class="image-carousel" id="image-carousel">
+                    <button class="carousel-btn left" onclick="prevImage()"><i class="fa-solid fa-chevron-left"></i></button>
+                    <img id="carousel-image" src="" alt="Plat" />
+                    <button class="carousel-btn right" onclick="nextImage()"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </aside>
+
+            <section class="ingredients">
+                <h2>Ingrédients :</h2>
+                <ul id="ingredient-list"></ul>
+            </section>
+
+            <section class="preparation">
+                <h2>Préparation :</h2>
+                <ol id="instructions"></ol>
+            </section>
+
+            
+        </main>
+
+        <section class="tips">
+            <h2>Conseils du chef :</h2>
+            <p id="tips"></p>
+        </section>
+
+        <footer class="credits">
+            <p><span id="cook"></span></p>
+        </footer>
+
+        <script src="js/recipe.js"></script>
+    </body>
+</html>
