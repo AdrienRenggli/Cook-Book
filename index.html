@@ -1,0 +1,46 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Cooking App</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        <link rel="stylesheet" href="css/homepage.css" />
+    </head>
+    <body>
+        <header>
+            <h1 class="app-title">Journal d'un chef</h1>
+            <div class="search-wrapper">
+                <i class="fa-solid fa-magnifying-glass" title="Filtrer"></i>
+                <input type="text" id="search" placeholder="nom, ingrédient, type, ..." />
+            </div>
+                <div id="filters">
+                    <i id="filter-toggle" class="fa-solid fa-filter" title="Filtrer"></i>
+            
+                    <button class="filter">Européen</button>
+                    <button class="filter">Asiatique</button>
+                    <button class="filter">Africain</button>
+                    <button class="filter">Americain</button>
+
+                    <button class="filter">Entrée</button>
+                    <button class="filter">Plat principal</button>
+                    <button class="filter">Dessert</button>
+
+                    <button class="filter">Carnivore</button>
+                    <button class="filter">Végétarien</button>
+                    <button class="filter">Végan</button>
+                    <!-- more filters -->
+                </div>
+        </header>
+
+        <main id="recipe-list">
+            <div class="recipe add-new">
+                <a href="add.html">+</a>
+            </div>
+            <!-- Recipe cards will be inserted here -->
+        </main>
+
+        <script src="js/main.js"></script>
+    </body>
+</html>
