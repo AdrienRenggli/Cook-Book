@@ -81,6 +81,12 @@ input[type="number"] {
     transition: all 0.2s ease;
 }
 
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 #filters .fa-filter {
     color: #ff918c;
     border-radius: 50%;
