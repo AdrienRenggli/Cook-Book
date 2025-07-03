@@ -1,10 +1,12 @@
 {
+  "id": "poulet_frit_coreen",
   "title": "Poulet Frit Coréen",
+  "tags": ["Asiatique", "Carnivore", "Plat principal"],
   "rating": 5,
   "difficulty": 4,
-  "price": 4.25,
-  "prepTime": "20 min",
-  "cookTime": "35 min",
+  "prepTime": 20,
+  "cookTime": 35,
+  "rest": true,
   "images": [
     "resources/poulet_frit_coreen_1.jpg",
     "resources/poulet_frit_coreen_2.jpg",

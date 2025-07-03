@@ -61,6 +61,13 @@ header {
     align-items: center;
 }
 
+/* Media Query for small screens (width <= 600px) */
+@media (max-width: 600px) {
+    #filters {
+        display: none;
+    }
+}
+
 #filters .fa-filter {
     color: #ff918c;
     border-radius: 50%;

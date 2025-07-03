@@ -12,8 +12,9 @@ header {
     background-color: #ffe5e0;
     padding: 1rem 0;
     color: #e06060;
-    font-size: 1.5rem;
+    font-size: 1rem;
     border-bottom: 2px solid #f5d0c7;
+    line-height: 1.6rem;
 }
 
 main.recipe-container {
@@ -79,7 +80,7 @@ main.recipe-container {
 aside.info {
     flex: 1;
     min-width: 250px;
-    background-color: #fff2f0;
+    background-color: #ffe5e0;
     border-radius: 10px;
     padding: 1.5rem;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);

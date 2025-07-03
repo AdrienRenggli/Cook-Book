@@ -1,26 +1,7 @@
 /* js/main.js */
-const recipes = [
-    {
-        id: "poulet_frit_coreen",
-        title: "Poulet Frit Coréen",
-        image: "resources/poulet_frit_coreen_1.jpg",
-        tags: ["Asiatique", "Carnivore", "Plat principal"],
-        difficulty: 4,
-        rating: 5,
-        time: "55 min + repos",
-        price: "4.25 CHF"
-  },
-  {
-        id: "moelleux_chocolat",
-        title: "Moelleux au Chocolat",
-        image: "resources/moelleux_chocolat_1.jpg",
-        tags: ["Dessert", "Végétarien"],
-        difficulty: 3,
-        rating: 4,
-        time: "40 min",
-        price: "2.50 CHF"
-  },
-  // More recipes...
+const recipeFiles = [
+    "poulet_frit_coreen",
+    // Add other recipe filenames here
 ];
 
 const recipeList = document.getElementById("recipe-list");
@@ -33,9 +14,9 @@ function createRecipeCard(recipe) {
         let hearts = '';
         for (let i = 0; i < 5; i++) {
             if (i < count)
-                hearts += '<i class="fa-solid fa-heart" style="color: red; margin-right: 2px;"></i>';
+                hearts += '<i class="fa-solid fa-heart" style="margin-right: 2px;"></i>';
             else 
-                hearts += '<i class="fa-regular fa-heart" style="color: red; margin-right: 2px;"></i>';
+                hearts += '<i class="fa-regular fa-heart" style="margin-right: 2px;"></i>';
         }
         return hearts;
     }
@@ -51,21 +32,27 @@ function createRecipeCard(recipe) {
         return difficulty;
     }
 
+    let price = 0;
+    recipe.ingredients.forEach(e => {
+            price += e.price;
+    });
+    price = Math.round(price / 0.05) * 0.05;
+
     card.innerHTML = `
         <a href="recipe.html?id=${recipe.id}">
-            <div class="image-wrapper"><img src="${recipe.image}" alt="${recipe.title}" /></div>
+            <div class="image-wrapper"><img src="${recipe.images[0]}" alt="${recipe.name}" /></div>
             <div class="content">
                 <h3>${recipe.title}</h3>
                 <p>Note : ${getHearts(recipe.rating)}
                 <br>Difficulté : ${getDifficulty(recipe.difficulty)}
-                <br>Temps : ${recipe.time}
-                <br>Prix : ${recipe.price} / personne</p>
+                <br>Temps : ${recipe.prepTime + recipe.cookTime}${recipe.rest ? " + repos" : ""}
+                <br>Prix : ${price.toFixed(2)} / personne</p>
                 <div class="tags">
                     ${recipe.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                 </div>
             </div>
         </a>
-        `;
+    `;
     return card;
 }
 
@@ -148,7 +135,21 @@ function updateFilterIcon() {
 }
 
 window.onload = () => {
-    displayRecipes(recipes)
+    // Fetch all recipes from individual JSON files
+    Promise.all(recipeFiles.map(fileName => fetch(`./resources/${fileName}.json`)
+        .then(response => response.json())
+        .then(data => data)
+        .catch(error => {
+            console.error(`Error loading recipe ${fileName}:`, error);
+            return null;
+        })
+    ))
+    .then(recipesData => {
+        // Filter out any null results in case some recipes failed to load
+        recipesData = recipesData.filter(recipe => recipe !== null);
+        recipes = recipesData;  // Store the fetched recipes
+        displayRecipes(recipes);
+    });
     setupFilters();
-    updateFilterIcon()
+    updateFilterIcon();
 }

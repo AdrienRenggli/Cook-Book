@@ -15,7 +15,6 @@ async function fetchRecipeData(id) {
     return await response.json();
 }
 
-
 let currentImageIndex = 0;
 let images = [];
 
@@ -90,7 +89,8 @@ function updateIngredients() {
         }
         ul.appendChild(li);
     });
-    document.getElementById("price").textContent = `${totalPrice.toFixed(2)} CHF`;
+    totalPrice = Math.round(totalPrice / 0.05) * 0.05
+    document.getElementById("price").textContent = `${totalPrice.toFixed(2)}`;
     document.getElementById("guest-count").textContent = guestCount;
 }
 
@@ -127,9 +127,9 @@ window.onload = async () => {
         let hearts = '';
         for (let i = 0; i < 5; i++) {
             if (i < count)
-                hearts += '<i class="fa-solid fa-heart" style="color: red; margin-right: 2px;"></i>';
+                hearts += '<i class="fa-solid fa-heart" style="margin-right: 2px;"></i>';
             else 
-                hearts += '<i class="fa-regular fa-heart" style="color: red; margin-right: 2px;"></i>';
+                hearts += '<i class="fa-regular fa-heart" style="margin-right: 2px;"></i>';
         }
         return hearts;
     }
