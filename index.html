@@ -15,23 +15,28 @@
                 <i class="fa-solid fa-magnifying-glass" title="Filtrer"></i>
                 <input type="text" id="search" placeholder="nom, ingrédient, type, ..." />
             </div>
-                <div id="filters">
-                    <i id="filter-toggle" class="fa-solid fa-filter" title="Filtrer"></i>
-            
-                    <button class="filter">Européen</button>
-                    <button class="filter">Asiatique</button>
-                    <button class="filter">Africain</button>
-                    <button class="filter">Americain</button>
+            <div id="filters">
+                <i id="filter-toggle" class="fa-solid fa-filter" title="Filtrer"></i>
+                 <input type="number" id="max-time" placeholder="Minutes max." />
+                <input type="number" id="max-price" placeholder="Prix max. pers." />
+                <input type="number" id="min-rating" placeholder="Note min." min="0" max="5" step="1" />
+                <input type="number" id="max-difficulty" placeholder="Difficulté max." min="0" max="5" step="1" />
+            </div>
+            <div id="filters">
+                <button class="filter">Européen</button>
+                <button class="filter">Asiatique</button>
+                <button class="filter">Africain</button>
+                <button class="filter">Americain</button>
 
-                    <button class="filter">Entrée</button>
-                    <button class="filter">Plat principal</button>
-                    <button class="filter">Dessert</button>
+                <button class="filter">Entrée</button>
+                <button class="filter">Plat principal</button>
+                <button class="filter">Dessert</button>
 
-                    <button class="filter">Carnivore</button>
-                    <button class="filter">Végétarien</button>
-                    <button class="filter">Végan</button>
-                    <!-- more filters -->
-                </div>
+                <button class="filter">Carnivore</button>
+                <button class="filter">Végétarien</button>
+                <button class="filter">Végan</button>
+                <!-- more filters -->
+            </div>
         </header>
 
         <main id="recipe-list">
