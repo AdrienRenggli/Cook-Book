@@ -143,7 +143,7 @@ function buildRecipe() {
         tips: document.getElementById('tips').value,
         cook: document.getElementById('cook').value,
         url: document.getElementById('url').value,
-        images: imageFiles.map(f => f.name) // défini lors du drag-drop, voir imageHandler
+        images: imageFiles.map(f => `resources/${f.name}`) // défini lors du drag-drop, voir imageHandler
     };
 }
 
