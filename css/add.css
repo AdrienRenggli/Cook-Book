@@ -1,0 +1,292 @@
+/* add.css */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fffaf9;
+    color: #2c2c2c;
+}
+
+header {
+    text-align: center;
+    background-color: #ffe5e0;
+    padding: 1rem 0;
+    color: #e06060;
+    font-size: 1rem;
+    border-bottom: 2px solid #f5d0c7;
+    line-height: 1.6rem;
+}
+
+header input {
+    width: 50%
+}
+
+main.recipe-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: auto;
+    align-items: flex-start;
+}
+
+/* Info Section */
+aside.info {
+    flex: 1;
+    min-width: 250px;
+    background-color: #ffe5e0;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: auto;
+    line-height: 1rem;
+}
+
+aside.info div {
+    margin-bottom: 1rem;
+}
+
+aside.info p,
+aside.info label {
+    margin: 0.3rem 0;
+    font-size: 1rem;
+}
+
+aside input {
+    width: 20%;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    border: 1px solid #f5d0c7;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+aside textarea {
+    margin-left: 0rem;
+    width: 90%;
+}
+
+.drop-area {
+    border: 2px dashed #ccc;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 10px;
+    background-color: #fafafa;
+    transition: background-color 0.3s ease;
+}
+
+.drop-area.highlight {
+    background-color: #e0ffe0;
+    border-color: #66cc66;
+}
+
+.drop-area p {
+    margin: 0;
+    font-size: 16px;
+    color: #666;
+}
+
+.drop-area input[type="file"] {
+    display: none;
+}
+
+.image-container {
+    position: relative;
+    display: inline-block;
+    margin: 8px;
+}
+
+.image-container img.thumb {
+    max-width: 120px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.remove-image {
+    position: absolute;
+    top: -18px;
+    right: 1px;
+    width: 24px;
+    height: 24px;
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: background 0.2s ease;
+}
+
+.remove-image:hover {
+    background: #d32f2f;
+}
+
+.thumb {
+    max-width: 100px;
+    margin: 10px;
+    border-radius: 6px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+}
+
+
+.ingredients input {
+    width: 75%;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    border: 1px solid #f5d0c7;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+input, textarea {
+    width: 90%;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    margin-left: 2rem;
+    border: 1px solid #f5d0c7;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+textarea {
+    resize: vertical;
+}
+
+button {
+    background-color: #e06060;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+button:hover {
+    background-color: #d55c5c;
+}
+
+/* Ingredient Section */
+.ingredients {
+    flex: 2;
+    min-width: 300px;
+}
+
+.ingredients h2 {
+    color: #e06060;
+    border-bottom: 2px solid #f5d0c7;
+    padding-bottom: 0.3rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.ingredients ul {
+    padding: 1rem 0;
+    margin: 0;
+    padding-left: 3rem;
+}
+
+.ingredients li {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.ingredients input {
+    margin-top: 0.5rem;
+}
+
+/* Preparation Section */
+.preparation {
+    flex: 3;
+    min-width: 300px;
+}
+
+.preparation h2 {
+    color: #e06060;
+    border-bottom: 2px solid #f5d0c7;
+    padding-bottom: 0.3rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.preparation textarea {
+    resize: vertical;
+    height: 150px;
+}
+
+.tips {
+    background-color: #fff0ec;
+    padding: 1.5rem 2rem;
+    margin-top: 2rem;
+    border-top: 2px solid #f5d0c7;
+}
+
+.tips h2 {
+    color: #e06060;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.tips textarea {
+    resize: vertical;
+    height: 100px;
+}
+
+footer.credits {
+    background-color: #fff0ec;
+    padding: 1.5rem 2rem;
+    border-top: 2px solid #f5d0c7;
+    font-size: 0.9rem;
+    color: #555;
+    display: block;
+    text-align: left;
+}
+
+footer.credits label {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+footer.credits input {
+    width: auto;
+    padding: 0.5rem;
+    border: 1px solid #f5d0c7;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+/* Style the list */
+footer.credits ol {
+    padding-left: 2rem;
+    margin-top: 1rem;
+}
+
+footer.credits ol li {
+    margin-bottom: 0.5rem;
+}
+
+footer.credits ol li a {
+    color: #e06060;
+    text-decoration: none;
+}
+
+footer.credits ol li a:hover {
+    text-decoration: underline;
+}
+

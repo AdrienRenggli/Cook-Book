@@ -1,0 +1,217 @@
+// js/add.js
+let imageFiles = [];
+
+function addIngredient() {
+    const li = document.createElement("li");
+    li.innerHTML = `
+        <input placeholder="Nom de l'ingrédient" />
+        <input type="number" placeholder="Quantité" min="0" />
+        <input placeholder="Unité (g, ml, etc.) '.' pour unité" />
+        <input type="number" placeholder="Prix" min="0" />
+    `;
+    document.getElementById("ingredient-list").appendChild(li);
+    li.querySelectorAll("input").forEach(i => i.addEventListener("input", updatePrice));
+}
+
+function round(number) {
+    return Math.round(number / 0.05) * 0.05;
+}
+
+function updatePrice() {
+    const items = document.querySelectorAll("#ingredient-list li");
+    let total = 0;
+    const guests = parseInt(document.getElementById("guests").value || "1");
+    items.forEach(li => {
+        const price = parseFloat(li.children[3].value || 0);
+        const quantity = parseFloat(li.children[1].value || 1);
+        total += price * quantity;
+    });
+    if (guests > 0) {
+        total = (total / guests);
+    }
+    document.getElementById("price").textContent = `${round(total).toFixed(2)} CHF / pers.`;
+}
+
+document.getElementById("guests").addEventListener("input", updatePrice);
+
+document.getElementById("ingredient-list").addEventListener("input", updatePrice);
+
+// Drag and Drop Image Upload
+const imageSection = document.querySelector(".images");
+const dropArea = document.createElement("div");
+dropArea.className = "drop-area";
+dropArea.innerHTML = "<p>Glissez-déposez les images ici ou cliquez pour en ajouter</p>";
+const input = document.createElement("input");
+input.type = "file";
+input.accept = "image/*";
+input.multiple = true;
+dropArea.appendChild(input);
+dropArea.addEventListener("click", () => input.click());
+imageSection.appendChild(dropArea);
+
+['dragenter', 'dragover'].forEach(e => dropArea.addEventListener(e, ev => {
+    ev.preventDefault();
+    dropArea.classList.add("highlight");
+}));
+['dragleave', 'drop'].forEach(e => dropArea.addEventListener(e, ev => {
+    ev.preventDefault();
+    dropArea.classList.remove("highlight");
+}));
+
+dropArea.addEventListener("drop", handleFiles);
+input.addEventListener("change", () => handleFiles({ dataTransfer: { files: input.files } }));
+
+function handleFiles(e) {
+    const files = Array.from(e.dataTransfer.files);
+    files.forEach((file, index) => {
+        if (!file.type.startsWith("image/")) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            imageFiles.push({
+                name: `${document.getElementById('recipe-title').value.replace(/\s+/g, '_')}_${imageFiles.length + 1}.jpg`,
+                data: reader.result.split(',')[1] // remove metadata prefix
+            });
+            updateImagePreviews();
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function showImagePreview(src, index) {
+    const container = document.createElement("div");
+    container.className = "image-container";
+
+    const img = document.createElement("img");
+    img.src = src;
+    img.className = "thumb";
+
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "remove-image";
+    removeBtn.innerHTML = "&times;";
+    removeBtn.title = "Supprimer cette image";
+    removeBtn.onclick = () => {
+        imageFiles.splice(index, 1);
+        container.remove();
+        updateImagePreviews();
+    };
+
+    container.appendChild(img);
+    container.appendChild(removeBtn);
+    imageSection.appendChild(container);
+}
+
+function updateImagePreviews() {
+    // Clear current previews
+    document.querySelectorAll(".image-container").forEach(c => c.remove());
+
+    // Re-render all images
+    imageFiles.forEach((imgFile, index) => {
+        const base64 = `data:image/jpeg;base64,${imgFile.data}`;
+        showImagePreview(base64, index);
+    });
+}
+
+function buildRecipe() {
+    const ingredients = Array.from(document.querySelectorAll("#ingredient-list li")).map(li => {
+        const guests = parseInt(document.getElementById("guests").value || 1);
+        const quantity = parseFloat(li.children[1].value || 0);
+        const quant = round(quantity / guests);
+        const price = round(parseFloat(li.children[3].value || 0) * quant).toFixed(2);
+        return {
+            name: li.children[0].value,
+            quantity: quant,
+            unit: li.children[2].value,
+            price: round(price),
+        };
+    });
+
+    const totalPrice = ingredients.reduce((acc, i) => acc + (i.price || 0), 0);
+    const guests = parseInt(document.getElementById('guests').value) || 1;
+
+    return {
+        id: document.getElementById('recipe-title').value.replace(/\s+/g, '_'),
+        title: document.getElementById('recipe-title').value,
+        rating: parseInt(document.getElementById('rating').value),
+        difficulty: parseInt(document.getElementById('difficulty').value),
+        prepTime: parseInt(document.getElementById('prep-time').value),
+        cookTime: parseInt(document.getElementById('cook-time').value),
+        rest: document.getElementById('rest').checked,
+        tags: document.getElementById('tags').value.split(',').map(t => t.trim()).filter(t => t),
+        ingredients: ingredients,
+        instructions: document.getElementById('instructions').value,
+        tips: document.getElementById('tips').value,
+        cook: document.getElementById('cook').value,
+        url: document.getElementById('url').value,
+        images: imageFiles.map(f => f.name) // défini lors du drag-drop, voir imageHandler
+    };
+}
+
+async function exportRecipe() {
+    const ingredients = Array.from(document.querySelectorAll("#ingredient-list li")).map(li => {
+        return {
+            name: li.children[0].value,
+            quantity: parseFloat(li.children[1].value || 0),
+            unit: li.children[2].value,
+            price: parseFloat(li.children[3].value || 0),
+        };
+    });
+
+    const recipe = buildRecipe();
+
+    const zip = new JSZip();
+
+    // Add the JSON file
+    const recipeFilename = `${recipe.id}.json`;
+    zip.file(recipeFilename, JSON.stringify(recipe, null, 2));
+
+    // Add image files (base64 -> binary)
+    imageFiles.forEach(file => {
+        zip.file(`${file.name}`, file.data, { base64: true });
+    });
+
+    // Generate and download the zip
+    const content = await zip.generateAsync({ type: "blob" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(content);
+    a.download = `${recipe.id}.zip`;
+    a.click();
+}
+
+function previewRecipe() {
+    const ingredients = Array.from(document.querySelectorAll("#ingredient-list li")).map(li => {
+        return {
+            name: li.children[0].value,
+            quantity: parseFloat(li.children[1].value || 0),
+            unit: li.children[2].value,
+            price: parseFloat(li.children[3].value || 0),
+        };
+    });
+
+    const recipe = {
+        title: document.getElementById("recipe-title").value,
+        rating: parseInt(document.getElementById("rating").value),
+        difficulty: parseInt(document.getElementById("difficulty").value),
+        prepTime: parseInt(document.getElementById("prep-time").value),
+        cookTime: parseInt(document.getElementById("cook-time").value),
+        rest: document.getElementById("rest").checked,
+        guests: parseInt(document.getElementById("guests").value),
+        tags: document.getElementById("tags").value.split(",").map(t => t.trim()),
+        ingredients,
+        instructions: document.getElementById("instructions").value,
+        tips: document.getElementById("tips").value,
+        cook: document.getElementById("cook").value,
+        url: document.getElementById("url").value,
+        images: imageFiles.map(f => `data:image/jpeg;base64,${f.data}`), // base64 images
+    };
+
+    const previewWindow = window.open("recipe.html", "recipePreview");
+
+    // Send data after the window is ready
+    const timer = setInterval(() => {
+        if (previewWindow && previewWindow.document.readyState === "complete") {
+            previewWindow.postMessage(recipe, "*");
+            clearInterval(timer);
+        }
+    }, 100);
+}

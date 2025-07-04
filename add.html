@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Ajouter une recette</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+        <link rel="stylesheet" href="css/add.css" />
+    </head>
+    <body>
+        <header>
+            <h1><input type="text" id="recipe-title" placeholder="Nom de la Recette" /></h1>
+        </header>
+
+        <main class="recipe-container">
+            <aside class="info">
+                <div>
+                    <p><strong>Note : </strong><input type="number" id="rating" min="0" max="5" /></p>
+                    <p><strong>Difficulté : </strong><input type="number" id="difficulty" min="0" max="5" /></p>
+                    <p><strong>Prix : </strong><span id="price"><i>continuez de remplir la recette pour calculer le prix</i></span></p>
+                    <p><strong>Préparation (min) : </strong><input type="number" id="prep-time" min="0" /></p>
+                    <p><strong>Cuisson (min) : </strong><input type="number" id="cook-time" min="0" /></p>
+                    <p><strong>Repos : </strong><input type="checkbox" id="rest" /></p>
+                    <p><strong>Personnes : </strong><input type="number" id="guests" min="1" /></p>
+                </div>
+
+                <section class="tags">
+                    <p><strong>Tags : </strong></p>
+                    <textarea id="tags" rows="4" placeholder="Séparez les tags par une virgule (ex: Asiatique, Carnivore, Plat principal)"></textarea>
+                </section>
+
+                <section class="images">
+                    <p><strong>Images :</strong></p>
+                </section>
+            </aside>
+
+            <section class="ingredients">
+                <h2>Ingrédients :</h2>
+                <ul id="ingredient-list">
+                    <li>
+                        <input placeholder="Nom de l'ingrédient" />
+                        <input type="number" placeholder="Quantité" min="0" />
+                        <input placeholder="Unité (g, ml, etc.) '.' pour unité" />
+                        <input type="number" placeholder="Prix" min="0" />
+                    </li>
+                </ul>
+                <button onclick="addIngredient()">+ Ajouter un ingrédient</button>
+            </section>
+
+            <section class="preparation">
+                <h2>Préparation</h2>
+                    <textarea id="instructions" rows="5" placeholder="Préparation de la recette"></textarea>
+            </section>
+        </main>
+
+        <section class="tips">
+            <h2>Conseils du chef :</h2>
+                <textarea id="tips" rows="3" placeholder="Astuces, variantes, conseils..."></textarea>
+        </section>
+
+        <footer class="credits">
+            <label>Cuisinier : <input id="cook" placeholder="Votre nom" /> site web : <input id="url" placeholder="(facultatif)" /></label><br>
+            <button onclick="exportRecipe()">📥 Télécharger la recette</button>
+        
+            <h3>Proposez votre recette</h3>
+            <p>Si vous souhaitez proposer une recette, il existe deux options :</p>
+            <ol>
+            <li><strong>Envoyez-la par email</strong> : Vous pouvez simplement nous envoyer votre recette par <a href="mailto:example@example.com" class="mailto-link">email</a>, en veillant à inclure l'image de la recette.
+            <li><strong>Merge Request via Git</strong> : Si vous êtes à l'aise avec Git, vous pouvez forker notre dépôt, ajouter votre recette et l'image aux fichiers du projet, puis soumettre une <em>merge request</em> (ou pull request). 
+                <ul>
+                <li>Toutes les ressources doivent être placées sous le dossier <code>resources/</code>.</li>
+
+                </ul>
+            </li>
+            </ol>
+            <h3>Notes importantes :</h3>
+                <li>L'image doit être nommée sous la forme <code>nom_de_la_recette_#.img</code> (par exemple : <code>poulet_au_curry_1.jpg</code>).</li>
+                <li>L'image avec le numéro <code>1</code> sera utilisée comme l'image de la recette dans le menu.</li>
+            <p>Merci pour votre contribution !</p>
+        </footer>
+
+        <script src="js/add.js"></script>
+    </body>
+</html>
