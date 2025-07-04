@@ -1,3 +1,2 @@
 modify page
 loading from local zip
-select difficulty and rating with icones instead of number

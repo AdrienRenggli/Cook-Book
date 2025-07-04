@@ -1,5 +1,72 @@
 // js/add.js
 let imageFiles = [];
+let love = 5;
+let difficulty = 5;
+
+// Add rating functionality to the page
+function createStarRating(id, maxRating) {
+    const container = document.getElementById(id);
+    container.innerHTML = ''; // Clear existing stars
+
+    for (let i = 1; i <= maxRating; i++) {
+        const star = document.createElement('i');
+        star.className = (id === "rating") ? 'fa fa-heart' : 'fa fa-star';
+        star.setAttribute('data-value', i);
+        star.addEventListener('click', function() {
+            setRating(id, i);
+            highlightStars(id, i);
+            resetStars(id);
+        });
+        container.appendChild(star);
+    }
+}
+
+function setRating(id, rating) {
+    const stars = document.querySelectorAll(`#${id} .${(id === "rating" ? 'fa-heart' : 'fa-star')}`);
+    stars.forEach(star => {
+        if (parseInt(star.getAttribute('data-value')) <= rating) {
+            star.classList.add('fa-solid');
+            star.classList.remove('fa-regular');
+        } else {
+            star.classList.add('fa-regular');
+            star.classList.remove('fa-solid');
+        }
+    });
+
+    if (id === "rating") {
+        love = rating; // Store rating value for the recipe
+    } else if (id === "difficulty") {
+        difficulty = rating; // Store difficulty value for the recipe
+    }
+}
+
+function highlightStars(id, rating) {
+    const stars = document.querySelectorAll(`#${id} .${(id === "rating" ? 'fa-heart' : 'fa-star')}`);
+    stars.forEach(star => {
+        if (parseInt(star.getAttribute('data-value')) <= rating) {
+            star.classList.add('fa-solid');
+            star.classList.remove('fa-regular');
+        } else {
+            star.classList.add('fa-regular');
+            star.classList.remove('fa-solid');
+        }
+    });
+}
+
+function resetStars(id) {
+    const stars = document.querySelectorAll(`#${id} .${(id === "rating" ? 'fa-heart' : 'fa-star')}`);
+    stars.forEach(star => {
+        if (!star.classList.contains('fa-solid')) {
+            star.classList.add('fa-regular');
+            star.classList.remove('fa-solid');
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    createStarRating("rating", 5);
+    createStarRating("difficulty", 5);
+});
 
 function addIngredient() {
     const li = document.createElement("li");
@@ -132,8 +199,8 @@ function buildRecipe() {
     return {
         id: document.getElementById('recipe-title').value.replace(/\s+/g, '_'),
         title: document.getElementById('recipe-title').value,
-        rating: parseInt(document.getElementById('rating').value),
-        difficulty: parseInt(document.getElementById('difficulty').value),
+        rating: love,
+        difficulty: difficulty,
         prepTime: parseInt(document.getElementById('prep-time').value),
         cookTime: parseInt(document.getElementById('cook-time').value),
         rest: document.getElementById('rest').checked,

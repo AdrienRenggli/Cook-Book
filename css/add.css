@@ -56,6 +56,14 @@ aside.info label {
     font-size: 1rem;
 }
 
+.rating  {
+    cursor: pointer;
+}
+
+.rating i {
+    padding: 2px;
+}
+
 aside input {
     width: 20%;
     padding: 0.5rem;

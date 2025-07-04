@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
     <head>
-        <meta charset="UTF-8">
+        <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Ajouter une recette</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -16,8 +16,8 @@
         <main class="recipe-container">
             <aside class="info">
                 <div>
-                    <p><strong>Note : </strong><input type="number" id="rating" min="0" max="5" /></p>
-                    <p><strong>Difficulté : </strong><input type="number" id="difficulty" min="0" max="5" /></p>
+                    <p><strong>Note : </strong><span id="rating" class="rating"></span></p>
+                    <p><strong>Difficulté : </strong><span id="difficulty" class="rating"></span></p>
                     <p><strong>Prix : </strong><span id="price"><i>continuez de remplir la recette pour calculer le prix</i></span></p>
                     <p><strong>Préparation (min) : </strong><input type="number" id="prep-time" min="0" /></p>
                     <p><strong>Cuisson (min) : </strong><input type="number" id="cook-time" min="0" /></p>
