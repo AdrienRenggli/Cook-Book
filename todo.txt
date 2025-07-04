@@ -1,0 +1,2 @@
+modify page
+select difficulty and rating with icones instead of number

@@ -1,6 +1,7 @@
 /* js/main.js */
 const recipeFiles = [
     "poulet_frit_coreen",
+    "Feuille-tés_aux_Chèvre_et_aux_Pommes",
     // Add other recipe filenames here
 ];
 

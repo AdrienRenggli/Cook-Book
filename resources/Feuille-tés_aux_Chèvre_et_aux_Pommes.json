@@ -1,0 +1,53 @@
+{
+  "id": "Feuille-tés_aux_Chèvre_et_aux_Pommes",
+  "title": "Feuille-tés aux Chèvre et aux Pommes",
+  "rating": 4,
+  "difficulty": 3,
+  "prepTime": 20,
+  "cookTime": 15,
+  "rest": false,
+  "tags": [
+    "Entrée",
+    "sucré",
+    "salé"
+  ],
+  "ingredients": [
+    {
+      "name": "Pâte feuilletée",
+      "quantity": 0.25,
+      "unit": ".",
+      "price": 0.5
+    },
+    {
+      "name": "Bûche de fromage de chèvre",
+      "quantity": 0.25,
+      "unit": ".",
+      "price": 1.1500000000000001
+    },
+    {
+      "name": "Pomme ou poire",
+      "quantity": 0.25,
+      "unit": ".",
+      "price": 0.15000000000000002
+    },
+    {
+      "name": "Ciboulette ou herbes de Provence",
+      "quantity": 0.25,
+      "unit": "",
+      "price": 0.25
+    },
+    {
+      "name": "Jaune d'oeuf",
+      "quantity": 0.25,
+      "unit": "",
+      "price": 0.15000000000000002
+    }
+  ],
+  "instructions": "Préchauffer le four à 180°C. Découper 8 disques dans la pâte feuilletée (avec un verre ou un bol).\nCouper 4 rondelles de fromage de chèvre 1.5 à 2 cm d'épaisseur.\nSur un disque de pâte, déposer une rondelle de pomme, une de chèvre et parsemer de ciboulette ciselée ou d'herbes de Provence. Recouvrir d'un autre disque de pâte et les coller en humectant légèrement les bords avec de l'eau.\nBadigeonner le tout du jaune d'œuf battu.\nEnfourner les feuilletés 15 minutes jusqu'à ce que la pâte soit dorée et cuite.",
+  "tips": "Convient parfaitement aux apéritifs.",
+  "cook": "Plume",
+  "url": "https://www.epfl.ch/campus/associations/plume/",
+  "images": [
+    "resources/Feuille-tés_aux_Chèvre_et_aux_Pommes_1.jpg"
+  ]
+}
