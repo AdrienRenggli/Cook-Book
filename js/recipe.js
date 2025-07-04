@@ -1,3 +1,4 @@
+/* js/recipe.js */
 let guestCount = 1;
 let baseIngredients = [];
 

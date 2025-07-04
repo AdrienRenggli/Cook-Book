@@ -1,10 +1,7 @@
 /* js/main.js */
-const recipeFiles = [
-    "Poulet_Frit_Coréen",
-    "Feuille-tés_aux_Chèvre_et_aux_Pommes",
-    "Toasts_Miel-Aubergine",
-    // Add other recipe filenames here
-];
+import { recipeFiles } from './recipeData.js';
+
+let recipes = [];
 
 const recipeList = document.getElementById("recipe-list");
 
