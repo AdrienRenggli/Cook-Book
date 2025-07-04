@@ -1,4 +1,3 @@
-/* js/recipe.js */
 let guestCount = 1;
 let baseIngredients = [];
 
@@ -8,20 +7,51 @@ function getRecipeIdFromURL() {
 }
 
 async function fetchRecipeData(id) {
-    const response = await fetch(`./resources/${id}.json`);
+    const response = await fetch(`./resources/${id}.zip`);
     if (!response.ok) {
         throw new Error("Recette introuvable");
     }
-    return await response.json();
+    const zip = await JSZip.loadAsync(await response.blob());
+
+    // Extract JSON data
+    const jsonFile = zip.file(`${id}.json`);
+    const jsonData = await jsonFile.async("text");
+    const recipeData = JSON.parse(jsonData);
+
+    // Extract images and create Object URLs
+    const imageUrls = {};
+    for (const imagePath of recipeData.images) {
+        const imageFile = zip.file(`${imagePath}`);
+        if (imageFile) {
+            const blob = await imageFile.async("blob");
+            imageUrls[imagePath] = URL.createObjectURL(blob);
+        }
+    }
+
+    recipeData.imageBlobs = imageUrls;
+    return recipeData;
 }
 
 let currentImageIndex = 0;
 let images = [];
 
-function displayImages(imagePaths) {
-    images = imagePaths;
+function displayImages(imageUrls) {
+    images = imageUrls;
     currentImageIndex = 0;
     updateCarouselImage();
+
+    // Get the carousel buttons
+    const prevButton = document.querySelector(".carousel-btn.left");
+    const nextButton = document.querySelector(".carousel-btn.right");
+
+    // Hide buttons if there's only one image
+    if (images.length <= 1) {
+        prevButton.style.display = "none";
+        nextButton.style.display = "none";
+    } else {
+        prevButton.style.display = "block";
+        nextButton.style.display = "block";
+    }
 }
 
 function updateCarouselImage() {
@@ -75,7 +105,7 @@ function updateIngredients() {
             let ingredientName = ing.name;
             if (quantity > 1) {
                 const nameWords = ingredientName.split(" ");
-                nameWords[0] = nameWords[0] + 's';  // Add 's' to the first word
+                nameWords[0] = nameWords[0] + 's';
                 ingredientName = nameWords.join(" ");
             }
             li.textContent = `${quantity} ${ingredientName}`;
@@ -128,7 +158,7 @@ window.onload = async () => {
         for (let i = 0; i < 5; i++) {
             if (i < count)
                 hearts += '<i class="fa-solid fa-heart" style="margin-right: 2px;"></i>';
-            else 
+            else
                 hearts += '<i class="fa-regular fa-heart" style="margin-right: 2px;"></i>';
         }
         return hearts;
@@ -139,7 +169,7 @@ window.onload = async () => {
         for (let i = 0; i < 5; i++) {
             if (i < count)
                 difficulty += '<i class="fa-solid fa-star" style="margin-right: 2px;"></i>';
-            else 
+            else
                 difficulty += '<i class="fa-regular fa-star" style="margin-right: 2px;"></i>';
         }
         return difficulty;
@@ -157,6 +187,7 @@ window.onload = async () => {
 
     baseIngredients = data.ingredients;
     console.log("Ingredients loaded:", data.ingredients);
-    displayImages(data.images);
+    // Pass the actual Object URLs to displayImages
+    displayImages(Object.values(data.imageBlobs));
     updateIngredients();
 };

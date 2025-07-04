@@ -1,7 +1,8 @@
 /* js/main.js */
 const recipeFiles = [
-    "poulet_frit_coreen",
+    "Poulet_Frit_Coréen",
     "Feuille-tés_aux_Chèvre_et_aux_Pommes",
+    "Toasts_Miel-Aubergine",
     // Add other recipe filenames here
 ];
 
@@ -16,7 +17,7 @@ function pricePerPerson(recipe) {
     return price;
 }
 
-function createRecipeCard(recipe) {
+async function createRecipeCard(recipe, zip) {
     const card = document.createElement("div");
     card.className = "recipe";
 
@@ -25,7 +26,7 @@ function createRecipeCard(recipe) {
         for (let i = 0; i < 5; i++) {
             if (i < count)
                 hearts += '<i class="fa-solid fa-heart" style="margin-right: 2px;"></i>';
-            else 
+            else
                 hearts += '<i class="fa-regular fa-heart" style="margin-right: 2px;"></i>';
         }
         return hearts;
@@ -36,15 +37,23 @@ function createRecipeCard(recipe) {
         for (let i = 0; i < 5; i++) {
             if (i < count)
                 difficulty += '<i class="fa-solid fa-star" style="margin-right: 2px;"></i>';
-            else 
+            else
                 difficulty += '<i class="fa-regular fa-star" style="margin-right: 2px;"></i>';
         }
         return difficulty;
     }
 
+    const imageFile = zip.file(`${recipe.images[0]}`);
+    let imageSrc = '';
+    if (imageFile) {
+        const imageData = await imageFile.async('uint8array');
+        const imageBlob = new Blob([imageData], { type: 'image/jpeg' });
+        imageSrc = URL.createObjectURL(imageBlob);
+    }
+
     card.innerHTML = `
         <a href="recipe.html?id=${recipe.id}">
-            <div class="image-wrapper"><img src="${recipe.images[0]}" alt="${recipe.name}" /></div>
+            <div class="image-wrapper"><img src="${imageSrc}" alt="${recipe.name}" /></div>
             <div class="content">
                 <h3>${recipe.title}</h3>
                 <p>Note : ${getHearts(recipe.rating)}
@@ -62,8 +71,10 @@ function createRecipeCard(recipe) {
 
 function displayRecipes(data) {
     recipeList.querySelectorAll(".recipe:not(.add-new)").forEach(e => e.remove());
-    data.forEach(recipe => {
-        const card = createRecipeCard(recipe);
+    data.forEach(async (recipeData) => {
+        const recipe = recipeData.recipe;
+        const zip = recipeData.zip;
+        const card = await createRecipeCard(recipe, zip);
         recipeList.appendChild(card);
     });
 }
@@ -129,24 +140,24 @@ function filterAndDisplayRecipes() {
     // First filter by search term: each recipe must match all keywords
     let filtered = recipes.filter(recipe => {
         return searchKeywords.every(keyword => {
-            return recipe.title.toLowerCase().includes(keyword) ||
-                   recipe.tags.some(tag => tag.toLowerCase().includes(keyword)) ||
-                   recipe.ingredients.some(ing => ing.name.toLowerCase().includes(keyword));
+            return recipe.recipe.title.toLowerCase().includes(keyword) ||
+                   recipe.recipe.tags.some(tag => tag.toLowerCase().includes(keyword)) ||
+                   recipe.recipe.ingredients.some(ing => ing.name.toLowerCase().includes(keyword));
         });
     });
 
     // Filter by max time, max price, min rating and max difficulty
-    filtered = filtered.filter(recipe => 
-        recipe.prepTime + recipe.cookTime <= maxTime &&
-        pricePerPerson(recipe) <= maxPrice &&
-        recipe.rating >= minRate &&
-        recipe.difficulty <= maxDiff
+    filtered = filtered.filter(recipe =>
+        recipe.recipe.prepTime + recipe.recipe.cookTime <= maxTime &&
+        pricePerPerson(recipe.recipe) <= maxPrice &&
+        recipe.recipe.rating >= minRate &&
+        recipe.recipe.difficulty <= maxDiff
     );
 
     // Then filter by active tags if any
     if (activeTags.size > 0) {
         filtered = filtered.filter(recipe =>
-            Array.from(activeTags).every(tag => recipe.tags.includes(tag))
+            Array.from(activeTags).every(tag => recipe.recipe.tags.includes(tag))
         );
     }
 
@@ -197,21 +208,40 @@ function updateFilterIcon() {
 
 // Initial setup
 window.onload = () => {
-    // Fetch all recipes from individual JSON files
-    Promise.all(recipeFiles.map(fileName => fetch(`./resources/${fileName}.json`)
-        .then(response => response.json())
-        .then(data => data)
-        .catch(error => {
-            console.error(`Error loading recipe ${fileName}:`, error);
-            return null;
-        })
-    ))
+    // Fetch all recipes from individual ZIP files
+    Promise.all(recipeFiles.map(fileName => {
+        console.log(`Fetching recipe: ${fileName}`);
+        return fetch(`./resources/${fileName}.zip`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                console.log(`Processing zip file: ${fileName}`);
+                return JSZip.loadAsync(blob).then(zip => {
+                    const jsonFile = zip.file(`${fileName}.json`);
+                    console.log(zip)
+                    if (!jsonFile) {
+                        throw new Error(`JSON file not found in zip: ${fileName}.json`);
+                    }
+                    return jsonFile.async("text").then(text => {
+                        const recipe = JSON.parse(text);
+                        return { recipe, zip };
+                    });
+                });
+            })
+            .catch(error => {
+                console.error(`Error loading recipe ${fileName}:`, error);
+                return null;
+            });
+    }))
     .then(recipesData => {
         // Filter out any null results in case some recipes failed to load
-        recipesData = recipesData.filter(recipe => recipe !== null);
-        recipes = recipesData;  // Store the fetched recipes
+        recipes = recipesData.filter(recipe => recipe !== null);
         displayRecipes(recipes);
     });
     setupFilters();
     updateFilterIcon();
-}
+};

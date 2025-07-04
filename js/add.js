@@ -91,7 +91,7 @@ function updatePrice() {
     items.forEach(li => {
         const price = parseFloat(li.children[3].value || 0);
         const quantity = parseFloat(li.children[1].value || 1);
-        total += price * quantity;
+        total += price;
     });
     if (guests > 0) {
         total = (total / guests);
@@ -184,7 +184,7 @@ function buildRecipe() {
         const guests = parseInt(document.getElementById("guests").value || 1);
         const quantity = parseFloat(li.children[1].value || 0);
         const quant = round(quantity / guests);
-        const price = round(parseFloat(li.children[3].value || 0) * quant).toFixed(2);
+        const price = round(parseFloat(li.children[3].value || 0) / guests).toFixed(2);
         return {
             name: li.children[0].value,
             quantity: quant,
@@ -234,7 +234,7 @@ async function exportRecipe() {
 
     // Add image files (base64 -> binary)
     imageFiles.forEach(file => {
-        zip.file(`${file.name}`, file.data, { base64: true });
+        zip.file(`resources/${file.name}`, file.data, { base64: true });
     });
 
     // Generate and download the zip
