@@ -1,5 +1,6 @@
 /* js/recipe.js */
 let guestCount = 1;
+let recipeGuest;
 let baseIngredients = [];
 
 function getRecipeIdFromURL() {
@@ -95,12 +96,12 @@ function updateIngredients() {
     ul.innerHTML = "";
     let totalPrice = 0;
     baseIngredients.forEach(ing => {
-        const quantity = ing.quantity * guestCount;
+        const quantity = (Math.round((ing.quantity / recipeGuest * guestCount) / 0.5) * 0.5);
         const price = ing.price * guestCount;
         totalPrice += price;
 
         const li = document.createElement("li");
-        if (ing.unit === "" && ing.quantity === 1) {
+        if (ing.unit === "" && ing.quantity == 1) {
             li.textContent = `${ing.name}`;
         } else if (ing.unit === ".") {
             let ingredientName = ing.name;
@@ -176,11 +177,15 @@ window.onload = async () => {
         return difficulty;
     }
 
+    guestCount = data.guests;
+    recipeGuest = guestCount;
+
     document.getElementById("recipe-title").textContent = data.title;
     document.getElementById("rating").innerHTML = getHearts(data.rating);
     document.getElementById("difficulty").innerHTML = getDifficulty(data.difficulty);
     document.getElementById("prep-time").textContent = data.prepTime;
     document.getElementById("cook-time").textContent = data.cookTime;
+    document.getElementById("guest-count").textContent = guestCount;
     document.getElementById("instructions").innerHTML = renderParagraph(data.instructions);
     document.getElementById("tips").innerHTML = renderParagraph(data.tips);
     document.getElementById("cook").innerHTML = `

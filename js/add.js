@@ -180,21 +180,19 @@ function updateImagePreviews() {
 }
 
 function buildRecipe() {
+    const guests = parseInt(document.getElementById('guests').value) || 1;
     const ingredients = Array.from(document.querySelectorAll("#ingredient-list li")).map(li => {
-        const guests = parseInt(document.getElementById("guests").value || 1);
         const quantity = parseFloat(li.children[1].value || 0);
-        const quant = round(quantity / guests);
         const price = round(parseFloat(li.children[3].value || 0) / guests).toFixed(2);
         return {
             name: li.children[0].value,
-            quantity: quant,
+            quantity: quantity.toFixed(2),
             unit: li.children[2].value,
             price: round(price),
         };
     });
 
     const totalPrice = ingredients.reduce((acc, i) => acc + (i.price || 0), 0);
-    const guests = parseInt(document.getElementById('guests').value) || 1;
 
     return {
         id: document.getElementById('recipe-title').value.replace(/\s+/g, '_'),
@@ -204,7 +202,11 @@ function buildRecipe() {
         prepTime: parseInt(document.getElementById('prep-time').value),
         cookTime: parseInt(document.getElementById('cook-time').value),
         rest: document.getElementById('rest').checked,
-        tags: document.getElementById('tags').value.split(',').map(t => t.trim()).filter(t => t),
+        tags: document.getElementById('tags').value.split(',').map(t => {
+            const trimmedTag = t.trim();
+            return trimmedTag.charAt(0).toUpperCase() + trimmedTag.slice(1);
+        }).filter(t => t),
+        guests: guests,
         ingredients: ingredients,
         instructions: document.getElementById('instructions').value,
         tips: document.getElementById('tips').value,
@@ -243,42 +245,4 @@ async function exportRecipe() {
     a.href = URL.createObjectURL(content);
     a.download = `${recipe.id}.zip`;
     a.click();
-}
-
-function previewRecipe() {
-    const ingredients = Array.from(document.querySelectorAll("#ingredient-list li")).map(li => {
-        return {
-            name: li.children[0].value,
-            quantity: parseFloat(li.children[1].value || 0),
-            unit: li.children[2].value,
-            price: parseFloat(li.children[3].value || 0),
-        };
-    });
-
-    const recipe = {
-        title: document.getElementById("recipe-title").value,
-        rating: parseInt(document.getElementById("rating").value),
-        difficulty: parseInt(document.getElementById("difficulty").value),
-        prepTime: parseInt(document.getElementById("prep-time").value),
-        cookTime: parseInt(document.getElementById("cook-time").value),
-        rest: document.getElementById("rest").checked,
-        guests: parseInt(document.getElementById("guests").value),
-        tags: document.getElementById("tags").value.split(",").map(t => t.trim()),
-        ingredients,
-        instructions: document.getElementById("instructions").value,
-        tips: document.getElementById("tips").value,
-        cook: document.getElementById("cook").value,
-        url: document.getElementById("url").value,
-        images: imageFiles.map(f => `data:image/jpeg;base64,${f.data}`), // base64 images
-    };
-
-    const previewWindow = window.open("recipe.html", "recipePreview");
-
-    // Send data after the window is ready
-    const timer = setInterval(() => {
-        if (previewWindow && previewWindow.document.readyState === "complete") {
-            previewWindow.postMessage(recipe, "*");
-            clearInterval(timer);
-        }
-    }, 100);
 }
