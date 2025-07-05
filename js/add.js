@@ -1,30 +1,89 @@
 // js/add.js
+
+/**
+ * @file This file handles the client-side logic for adding and managing recipe data,
+ * including star ratings, ingredient management, image uploads, and recipe export.
+ */
+
+// --- Global Variables ---
+/**
+ * @type {Array<Object>} Stores information about uploaded image files (name and base64 data).
+ */
 let imageFiles = [];
+
+/**
+ * @type {number} Stores the current "love" (recipe rating) value. Default is 5.
+ */
 let love = 5;
+
+/**
+ * @type {number} Stores the current "difficulty" rating value. Default is 5.
+ */
 let difficulty = 5;
 
-// Add rating functionality to the page
-function createStarRating(id, maxRating) {
-    const container = document.getElementById(id);
-    container.innerHTML = ''; // Clear existing stars
+// --- Utility Functions ---
 
-    for (let i = 1; i <= maxRating; i++) {
-        const star = document.createElement('i');
-        star.className = (id === "rating") ? 'fa fa-heart' : 'fa fa-star';
-        star.setAttribute('data-value', i);
-        star.addEventListener('click', function() {
-            setRating(id, i);
-            highlightStars(id, i);
-            resetStars(id);
-        });
-        container.appendChild(star);
-    }
+/**
+ * Rounds a number to the nearest 0.05.
+ * @param {number} number - The number to round.
+ * @returns {number} The rounded number.
+ */
+function roundToNearestFiveCents(number) {
+    return Math.round(number / 0.05) * 0.05;
 }
 
-function setRating(id, rating) {
-    const stars = document.querySelectorAll(`#${id} .${(id === "rating" ? 'fa-heart' : 'fa-star')}`);
+/**
+ * Capitalizes the first letter of a string.
+ * @param {string} str - The input string.
+ * @returns {string} The string with its first letter capitalized, or an empty string if input is invalid.
+ */
+function capitalizeFirstLetter(str) {
+    if (typeof str !== 'string' || str.length === 0) {
+        return '';
+    }
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+/**
+ * Creates a DOM element with specified tag, class, and attributes.
+ * @param {string} tagName - The tag name of the element to create (e.g., 'div', 'button').
+ * @param {string} [className=''] - The class name(s) to add to the element.
+ * @param {Object} [attributes={}] - An object of attribute key-value pairs to set on the element.
+ * @returns {HTMLElement} The created HTML element.
+ */
+function createElement(tagName, className = '', attributes = {}) {
+    const element = document.createElement(tagName);
+    if (className) {
+        element.className = className;
+    }
+    for (const key in attributes) {
+        element.setAttribute(key, attributes[key]);
+    }
+    return element;
+}
+
+// --- Star Rating Functionality ---
+
+/**
+ * Determines the appropriate icon class (heart or star) based on the rating ID.
+ * @param {string} id - The ID of the rating container ('rating' or 'difficulty').
+ * @returns {string} The base icon class ('fa-heart' or 'fa-star').
+ */
+function getRatingIconClass(id) {
+    return id === "rating" ? 'fa-heart' : 'fa-star';
+}
+
+/**
+ * Highlights stars based on a given rating value.
+ * @param {string} id - The ID of the star rating container.
+ * @param {number} ratingValue - The rating value to highlight up to.
+ */
+function updateStarHighlighting(id, ratingValue) {
+    const iconClass = getRatingIconClass(id);
+    const stars = document.querySelectorAll(`#${id} .${iconClass}`);
     stars.forEach(star => {
-        if (parseInt(star.getAttribute('data-value')) <= rating) {
+        const starValue = parseInt(star.getAttribute('data-value'));
+        if (starValue <= ratingValue) {
             star.classList.add('fa-solid');
             star.classList.remove('fa-regular');
         } else {
@@ -32,6 +91,16 @@ function setRating(id, rating) {
             star.classList.remove('fa-solid');
         }
     });
+}
+
+/**
+ * Sets the rating for a specific star rating system (love or difficulty).
+ * Updates the global `love` or `difficulty` variable and visually updates the stars.
+ * @param {string} id - The ID of the star rating container ('rating' or 'difficulty').
+ * @param {number} rating - The selected rating value.
+ */
+function setAndDisplayRating(id, rating) {
+    updateStarHighlighting(id, rating); // Update visual state first
 
     if (id === "rating") {
         love = rating; // Store rating value for the recipe
@@ -40,104 +109,103 @@ function setRating(id, rating) {
     }
 }
 
-function highlightStars(id, rating) {
-    const stars = document.querySelectorAll(`#${id} .${(id === "rating" ? 'fa-heart' : 'fa-star')}`);
-    stars.forEach(star => {
-        if (parseInt(star.getAttribute('data-value')) <= rating) {
-            star.classList.add('fa-solid');
-            star.classList.remove('fa-regular');
-        } else {
-            star.classList.add('fa-regular');
-            star.classList.remove('fa-solid');
-        }
-    });
+/**
+ * Initializes a star rating system within a specified container.
+ * @param {string} id - The ID of the HTML element that will contain the stars.
+ * @param {number} maxRating - The maximum number of stars (e.g., 5).
+ */
+function createStarRating(id, maxRating) {
+    const container = document.getElementById(id);
+    if (!container) {
+        console.error(`Star rating container with ID '${id}' not found.`);
+        return;
+    }
+    container.innerHTML = ''; // Clear existing stars
+
+    const iconClass = getRatingIconClass(id);
+
+    for (let i = 1; i <= maxRating; i++) {
+        const star = createElement('i', iconClass, { 'data-value': i });
+        star.addEventListener('click', () => setAndDisplayRating(id, i));
+        container.appendChild(star);
+    }
+    // Initialize with default value
+    setAndDisplayRating(id, (id === "rating" ? love : difficulty));
 }
 
-function resetStars(id) {
-    const stars = document.querySelectorAll(`#${id} .${(id === "rating" ? 'fa-heart' : 'fa-star')}`);
-    stars.forEach(star => {
-        if (!star.classList.contains('fa-solid')) {
-            star.classList.add('fa-regular');
-            star.classList.remove('fa-solid');
-        }
-    });
-}
+// --- Ingredient Management ---
 
-document.addEventListener('DOMContentLoaded', () => {
-    createStarRating("rating", 5);
-    createStarRating("difficulty", 5);
-});
-
+/**
+ * Adds a new ingredient input row to the ingredient list.
+ */
 function addIngredient() {
-    const li = document.createElement("li");
+    const li = createElement("li");
     li.innerHTML = `
         <input placeholder="Nom de l'ingrédient" />
         <input type="number" placeholder="Quantité" min="0" />
         <input placeholder="Unité (g, ml, etc.) '.' pour unité" />
         <input type="number" placeholder="Prix" min="0" />
     `;
-    document.getElementById("ingredient-list").appendChild(li);
-    li.querySelectorAll("input").forEach(i => i.addEventListener("input", updatePrice));
-}
-
-function round(number) {
-    return Math.round(number / 0.05) * 0.05;
-}
-
-function updatePrice() {
-    const items = document.querySelectorAll("#ingredient-list li");
-    let total = 0;
-    const guests = parseInt(document.getElementById("guests").value || "1");
-    items.forEach(li => {
-        const price = parseFloat(li.children[3].value || 0);
-        const quantity = parseFloat(li.children[1].value || 1);
-        total += price;
-    });
-    if (guests > 0) {
-        total = (total / guests);
+    const ingredientList = document.getElementById("ingredient-list");
+    if (ingredientList) {
+        ingredientList.appendChild(li);
+        // Attach event listener to each new input for immediate price updates
+        li.querySelectorAll("input").forEach(inputElement => inputElement.addEventListener("input", updateTotalPriceDisplay));
+    } else {
+        console.error("Ingredient list container not found.");
     }
-    document.getElementById("price").textContent = `${round(total).toFixed(2)} CHF / pers.`;
 }
 
-document.getElementById("guests").addEventListener("input", updatePrice);
+/**
+ * Updates the displayed total price per person based on current ingredients and guests.
+ */
+function updateTotalPriceDisplay() {
+    const items = document.querySelectorAll("#ingredient-list li");
+    let totalCost = 0;
+    const guestsInput = document.getElementById("guests");
+    const guests = parseInt(guestsInput ? guestsInput.value : "1") || 1; // Default to 1 if not found or invalid
 
-document.getElementById("ingredient-list").addEventListener("input", updatePrice);
+    items.forEach(li => {
+        // Access children by index, assuming fixed structure
+        const priceInput = li.children[3];
+        const quantityInput = li.children[1];
 
-// Drag and Drop Image Upload
-const imageSection = document.querySelector(".images");
-const dropArea = document.createElement("div");
-dropArea.className = "drop-area";
-dropArea.innerHTML = "<p>Glissez-déposez les images ici ou cliquez pour en ajouter</p>";
-const input = document.createElement("input");
-input.type = "file";
-input.accept = "image/*";
-input.multiple = true;
-dropArea.appendChild(input);
-dropArea.addEventListener("click", () => input.click());
-imageSection.appendChild(dropArea);
+        const price = parseFloat(priceInput ? priceInput.value : "0") || 0;
+        // Quantity isn't directly used for total price, but included for completeness if logic changes
+        // const quantity = parseFloat(quantityInput ? quantityInput.value : "1") || 1;
 
-['dragenter', 'dragover'].forEach(e => dropArea.addEventListener(e, ev => {
-    ev.preventDefault();
-    dropArea.classList.add("highlight");
-}));
-['dragleave', 'drop'].forEach(e => dropArea.addEventListener(e, ev => {
-    ev.preventDefault();
-    dropArea.classList.remove("highlight");
-}));
+        totalCost += price;
+    });
 
-dropArea.addEventListener("drop", handleFiles);
-input.addEventListener("change", () => handleFiles({ dataTransfer: { files: input.files } }));
+    const pricePerGuest = guests > 0 ? totalCost / guests : 0;
+    const priceDisplayElement = document.getElementById("price");
+    if (priceDisplayElement) {
+        priceDisplayElement.textContent = `${roundToNearestFiveCents(pricePerGuest).toFixed(2)} CHF / pers.`;
+    }
+}
 
-function handleFiles(e) {
-    const files = Array.from(e.dataTransfer.files);
-    files.forEach((file, index) => {
-        if (!file.type.startsWith("image/")) return;
+// --- Image Upload and Preview Functionality ---
+
+/**
+ * Handles files dropped or selected via the file input.
+ * Processes image files by converting them to base64 and updating previews.
+ * @param {DragEvent | Event} e - The event object (DragEvent for drop, Event for change).
+ */
+function handleImageFiles(e) {
+    const files = Array.from(e.dataTransfer ? e.dataTransfer.files : e.target.files);
+
+    files.forEach(file => {
+        if (!file.type.startsWith("image/")) {
+            console.warn(`Skipping non-image file: ${file.name}`);
+            return;
+        }
 
         const reader = new FileReader();
-        reader.onload = () => {
+        reader.onload = (event) => {
+            const recipeTitle = document.getElementById('recipe-title')?.value.replace(/\s+/g, '_') || 'untitled_recipe';
             imageFiles.push({
-                name: `${document.getElementById('recipe-title').value.replace(/\s+/g, '_')}_${imageFiles.length + 1}.jpg`,
-                data: reader.result.split(',')[1] // remove metadata prefix
+                name: `${recipeTitle}_${Date.now()}_${imageFiles.length + 1}.jpg`, // Unique name to prevent conflicts
+                data: event.target.result.split(',')[1] // Extract base64 data
             });
             updateImagePreviews();
         };
@@ -145,29 +213,31 @@ function handleFiles(e) {
     });
 }
 
+/**
+ * Displays a single image preview with a remove button.
+ * @param {string} src - The base64 data URL of the image.
+ * @param {number} index - The index of the image in the `imageFiles` array.
+ */
 function showImagePreview(src, index) {
-    const container = document.createElement("div");
-    container.className = "image-container";
-
-    const img = document.createElement("img");
-    img.src = src;
-    img.className = "thumb";
-
-    const removeBtn = document.createElement("button");
-    removeBtn.className = "remove-image";
+    const container = createElement("div", "image-container");
+    const img = createElement("img", "thumb", { src: src });
+    const removeBtn = createElement("button", "remove-image", { title: "Supprimer cette image" });
     removeBtn.innerHTML = "&times;";
-    removeBtn.title = "Supprimer cette image";
+
     removeBtn.onclick = () => {
-        imageFiles.splice(index, 1);
-        container.remove();
-        updateImagePreviews();
+        imageFiles.splice(index, 1); // Remove from array
+        container.remove(); // Remove from DOM
+        updateImagePreviews(); // Re-render to update indices if needed
     };
 
     container.appendChild(img);
     container.appendChild(removeBtn);
-    imageSection.appendChild(container);
+    document.querySelector(".images")?.appendChild(container); // Append to the image section
 }
 
+/**
+ * Clears existing image previews and re-renders all images from `imageFiles`.
+ */
 function updateImagePreviews() {
     // Clear current previews
     document.querySelectorAll(".image-container").forEach(c => c.remove());
@@ -179,71 +249,164 @@ function updateImagePreviews() {
     });
 }
 
-function buildRecipe() {
-    const guests = parseInt(document.getElementById('guests').value) || 1;
+/**
+ * Sets up the drag-and-drop area for image uploads.
+ */
+function setupImageDropArea() {
+    const imageSection = document.querySelector(".images");
+    if (!imageSection) {
+        console.error("Image section container not found.");
+        return;
+    }
+
+    const dropArea = createElement("div", "drop-area");
+    dropArea.innerHTML = "<p>Glissez-déposez les images ici ou cliquez pour en ajouter</p>";
+
+    const input = createElement("input", '', { type: "file", accept: "image/*", multiple: true });
+    dropArea.appendChild(input);
+
+    dropArea.addEventListener("click", () => input.click());
+
+    ['dragenter', 'dragover'].forEach(eventName => dropArea.addEventListener(eventName, (ev) => {
+        ev.preventDefault();
+        dropArea.classList.add("highlight");
+    }));
+
+    ['dragleave', 'drop'].forEach(eventName => dropArea.addEventListener(eventName, (ev) => {
+        ev.preventDefault();
+        dropArea.classList.remove("highlight");
+    }));
+
+    dropArea.addEventListener("drop", handleImageFiles);
+    input.addEventListener("change", handleImageFiles);
+
+    imageSection.appendChild(dropArea);
+}
+
+// --- Recipe Building and Export ---
+
+/**
+ * Builds a recipe object from the form input values.
+ * @returns {Object} A comprehensive recipe object ready for export.
+ */
+function buildRecipeObject() {
+    const getElementValue = (id, defaultValue = '') => document.getElementById(id)?.value || defaultValue;
+    const getElementChecked = (id) => document.getElementById(id)?.checked || false;
+    const getElementIntValue = (id, defaultValue = 0) => parseInt(getElementValue(id, defaultValue.toString())) || defaultValue;
+
+    const guests = getElementIntValue('guests', 1);
+
     const ingredients = Array.from(document.querySelectorAll("#ingredient-list li")).map(li => {
-        const quantity = parseFloat(li.children[1].value || 0);
-        const price = round(parseFloat(li.children[3].value || 0) / guests).toFixed(2);
-        const name = li.children[0].value;
+        const nameInput = li.children[0];
+        const quantityInput = li.children[1];
+        const unitInput = li.children[2];
+        const priceInput = li.children[3];
+
+        const name = nameInput ? nameInput.value : '';
+        const quantity = parseFloat(quantityInput ? quantityInput.value : '0') || 0;
+        const unit = unitInput ? unitInput.value : '';
+        const price = parseFloat(priceInput ? priceInput.value : '0') || 0;
+
         return {
-            name: name.charAt(0).toUpperCase() + name.slice(1),
-            quantity: quantity.toFixed(2),
-            unit: li.children[2].value,
-            price: round(price),
+            name: capitalizeFirstLetter(name),
+            quantity: quantity,
+            unit: unit,
+            price: roundToNearestFiveCents(price / guests), // Price per person
         };
     });
 
-    const totalPrice = ingredients.reduce((acc, i) => acc + (i.price || 0), 0);
+    const tags = getElementValue('tags').split(',')
+                                    .map(t => capitalizeFirstLetter(t.trim()))
+                                    .filter(t => t); // Filter out empty tags
+
+    const recipeTitle = getElementValue('recipe-title');
 
     return {
-        id: document.getElementById('recipe-title').value.replace(/\s+/g, '_'),
-        title: document.getElementById('recipe-title').value,
+        id: recipeTitle.replace(/\s+/g, '_'), // Unique ID from title
+        title: recipeTitle,
         rating: love,
         difficulty: difficulty,
-        prepTime: parseInt(document.getElementById('prep-time').value),
-        cookTime: parseInt(document.getElementById('cook-time').value),
-        rest: document.getElementById('rest').checked,
-        tags: document.getElementById('tags').value.split(',').map(t => {
-            const trimmedTag = t.trim();
-            return trimmedTag.charAt(0).toUpperCase() + trimmedTag.slice(1);
-        }).filter(t => t),
+        prepTime: getElementIntValue('prep-time'),
+        cookTime: getElementIntValue('cook-time'),
+        rest: getElementChecked('rest'),
+        tags: tags,
         guests: guests,
         ingredients: ingredients,
-        instructions: document.getElementById('instructions').value,
-        tips: document.getElementById('tips').value,
-        cook: document.getElementById('cook').value,
-        url: document.getElementById('url').value,
-        images: imageFiles.map(f => `resources/${f.name}`) // défini lors du drag-drop, voir imageHandler
+        instructions: getElementValue('instructions'),
+        tips: getElementValue('tips'),
+        cook: getElementValue('cook'),
+        url: getElementValue('url'),
+        images: imageFiles.map(f => `resources/${f.name}`) // Paths for the zipped file structure
     };
 }
 
+/**
+ * Exports the recipe data and associated images as a downloadable ZIP file.
+ * Requires the JSZip library to be loaded.
+ */
 async function exportRecipe() {
-    const ingredients = Array.from(document.querySelectorAll("#ingredient-list li")).map(li => {
-        return {
-            name: li.children[0].value,
-            quantity: parseFloat(li.children[1].value || 0),
-            unit: li.children[2].value,
-            price: parseFloat(li.children[3].value || 0),
-        };
-    });
+    if (typeof JSZip === 'undefined') {
+        console.error("JSZip library is not loaded. Cannot export recipe.");
+        alert("JSZip library is required for exporting recipes. Please ensure it's linked.");
+        return;
+    }
 
-    const recipe = buildRecipe();
-
+    const recipe = buildRecipeObject();
     const zip = new JSZip();
 
-    // Add the JSON file
+    // Add the JSON file to the zip
     const recipeFilename = `${recipe.id}.json`;
     zip.file(recipeFilename, JSON.stringify(recipe, null, 2));
 
-    // Add image files (base64 -> binary)
+    // Add image files (base64 data) to a 'resources' folder within the zip
     imageFiles.forEach(file => {
         zip.file(`resources/${file.name}`, file.data, { base64: true });
     });
 
-    // Generate and download the zip
-    const content = await zip.generateAsync({ type: "blob" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(content);
-    a.download = `${recipe.id}.zip`;
-    a.click();
+    try {
+        // Generate and download the zip file
+        const content = await zip.generateAsync({ type: "blob" });
+        const downloadLink = createElement("a", '', {
+            href: URL.createObjectURL(content),
+            download: `${recipe.id}.zip`
+        });
+        downloadLink.click();
+        URL.revokeObjectURL(downloadLink.href); // Clean up the object URL
+    } catch (error) {
+        console.error("Error generating or downloading zip file:", error);
+        alert("Failed to export recipe. Please try again.");
+    }
+}
+
+// --- Event Listeners and Initializations ---
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize star ratings
+    createStarRating("rating", 5);
+    createStarRating("difficulty", 5);
+
+    // Setup ingredient price updates
+    const guestsInput = document.getElementById("guests");
+    if (guestsInput) {
+        guestsInput.addEventListener("input", updateTotalPriceDisplay);
+    }
+    const ingredientList = document.getElementById("ingredient-list");
+    if (ingredientList) {
+        ingredientList.addEventListener("input", updateTotalPriceDisplay); // Event delegation for ingredient inputs
+    }
+
+    // Set up the drag and drop area for images
+    setupImageDropArea();
+
+    // Attach event listener for adding ingredients (assuming a button exists with this ID)
+    const addIngredientBtn = document.getElementById('add-ingredient-btn'); // Assuming a button with this ID
+    if (addIngredientBtn) {
+        addIngredientBtn.addEventListener('click', addIngredient);
+    }
+});
+
+// Assuming there is an export button, add an event listener for it
+const exportButton = document.getElementById('export-recipe-button'); // Assuming a button with this ID
+if (exportButton) {
+    exportButton.addEventListener('click', exportRecipe);
 }
