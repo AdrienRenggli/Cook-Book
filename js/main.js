@@ -146,7 +146,7 @@ async function createRecipeCard(recipe, zip) {
         <a href="recipe.html?id=${recipe.id}">
             <div class="image-wrapper">
                 <img src="${imageSrc || 'path/to/default/image.jpg'}" alt="${recipe.title || 'Recipe Image'}" onerror="this.onerror=null;this.src='path/to/fallback/image.jpg';" />
-            </div>
+            </div class="recipe-info">
             <div class="content">
                 <h3>${recipe.title}</h3>
                 <div class="recipe-details">
@@ -158,9 +158,9 @@ async function createRecipeCard(recipe, zip) {
                         Temps : ${timeDisplay}
                         <br>Prix : ${calculatePricePerPerson(recipe).toFixed(2)} CHF / personne
                     </p>
-                </div>
-                <div class="tags">
-                    ${recipe.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    <div class="tags">
+                        ${recipe.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
                 </div>
             </div>
         </a>

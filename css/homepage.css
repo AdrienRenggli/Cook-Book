@@ -1,10 +1,11 @@
-/* css/homepage.css */
+/* General Styles */
 body {
     font-family: sans-serif;
     margin: 0;
     background-color: #fff8f5;
 }
 
+/* Header Styles */
 header {
     padding: 1rem;
     background-color: #ffe3dc;
@@ -25,6 +26,7 @@ header {
     text-align: center;
 }
 
+/* Search Styles */
 .search-wrapper {
     position: relative;
     width: 100%;
@@ -53,6 +55,7 @@ header {
     box-sizing: border-box;
 }
 
+/* Filters Styles */
 #filters {
     display: flex;
     flex-wrap: wrap;
@@ -61,7 +64,6 @@ header {
     align-items: center;
 }
 
-/* Media Query for small screens (width <= 600px) */
 @media (max-width: 600px) {
     #filters {
         display: none;
@@ -87,13 +89,7 @@ input[type="number"]::-webkit-inner-spin-button {
     margin: 0;
 }
 
-#filters .fa-filter {
-    color: #ff918c;
-    border-radius: 50%;
-    padding: 0.5rem;
-    font-size: 1.5rem;
-}
-
+#filters .fa-filter,
 #filters .fa-filter-circle-xmark {
     color: #ff918c;
     border-radius: 50%;
@@ -122,6 +118,7 @@ input[type="number"]::-webkit-inner-spin-button {
     transform: scale(1.05);
 }
 
+/* Main Content Styles */
 main#recipe-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(275px, 1fr));
@@ -129,16 +126,19 @@ main#recipe-list {
     padding: 1rem;
 }
 
+/* Recipe Styles */
 .recipe {
     background-color: white;
     border: 2px solid #ffa4a0;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    transition: tranform 0.2s ease;
+    transition: transform 0.2s ease;
     display: flex;
     flex-direction: column;
+    /* Ensure the card itself allows content to grow */
     justify-content: space-between;
+    height: auto; /* Or a min-height if you want uniform card heights */
 }
 
 .recipe:hover {
@@ -158,7 +158,11 @@ main#recipe-list {
 
 .recipe .content {
     padding: 0.75rem;
-    color: #6b4c3b
+    color: #6b4c3b;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
 }
 
 .recipe h3 {
@@ -171,13 +175,21 @@ main#recipe-list {
     display: flex;
     flex-wrap: wrap;
     gap: 0.25rem;
-    margin-top:0.5rem;
+    margin-top: 0.5rem;
 }
 
 .recipe a {
     text-decoration: none;
     color: inherit;
-    display: block;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    height: 100%;
+}
+
+.recipe .recipe-details {
+    margin-top: auto;
+    margin-bottom: 0.5rem;
 }
 
 .tag {
@@ -188,13 +200,14 @@ main#recipe-list {
     color: white;
 }
 
+/* Add New Recipe Styles */
 .add-new {
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 10rem;
     color: #ff6f61;
-    cursor:pointer;
+    cursor: pointer;
     text-decoration: none;
 }
 
@@ -207,11 +220,10 @@ main#recipe-list {
     cursor: pointer;
     transition: background-color 0.3s;
     color: #6b4c3b;
-
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Vertically center content */
-    align-items: center;     /* Horizontally center content */
+    justify-content: center;
+    align-items: center;
 }
 
 .drop-zone p {
@@ -231,6 +243,7 @@ main#recipe-list {
     background-color: #ff918c;
 }
 
+/* Footer Styles */
 footer {
     background-color: #ffe3dc;
     text-align: center;
