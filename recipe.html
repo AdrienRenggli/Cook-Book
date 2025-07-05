@@ -21,9 +21,9 @@
                     <p><strong>Préparation :</strong> <span id="prep-time"></span> min</p>
                     <p><strong>Cuisson :</strong> <span id="cook-time"></span> min</p>
                     <p><strong>Personnes :</strong>
-                        <button onclick="changeGuests(-1)">-</button>
+                        <button onclick="changeGuests(-1)"><i class="fa-solid fa-minus"></i></button>
                         <span id="guest-count">1</span>
-                        <button onclick="changeGuests(1)">+</button>
+                        <button onclick="changeGuests(1)"><i class="fa-solid fa-plus"></i></button>
                     </p>
                 </div>
                 <div class="image-carousel" id="image-carousel">
@@ -31,6 +31,7 @@
                     <img id="carousel-image" src="" alt="Plat" />
                     <button class="carousel-btn right" onclick="nextImage()"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
+                <button id="download-recipe-btn" class="download-button">Télécharger la recette</button>
             </aside>
 
             <section class="ingredients">
@@ -42,8 +43,6 @@
                 <h2>Préparation :</h2>
                 <ol id="instructions"></ol>
             </section>
-
-            
         </main>
 
         <section class="tips">

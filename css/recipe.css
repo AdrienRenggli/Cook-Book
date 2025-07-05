@@ -149,7 +149,7 @@ button {
     transform: translateY(-50%);
     background: rgba(255, 255, 255, 0.4);
     border: none;
-    font-size: 1.5rem;
+    font-size: 1rem;
     font-weight: bold;
     width: 2.5rem;
     height: 2.5rem;
@@ -170,6 +170,34 @@ button {
 
 .carousel-btn.right {
     right: 10px;
+}
+
+/* Style for the Download Recipe Button */
+.download-button {
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+    background-color: #e06060;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    justify-content: center;
+}
+
+.download-button:hover {
+    background-color: #c94a4a;
+}
+
+.download-button:active {
+    background-color: #b33d3d;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15) inset;
 }
 
 /* Footer Styling */
@@ -200,6 +228,6 @@ section.credits a:hover {
     }
 
     aside.info-section {
-        order: -1; /* If needed */
+        order: -1;
     }
 }

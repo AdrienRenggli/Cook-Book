@@ -34,6 +34,11 @@ let currentImageIndex = 0;
  */
 let imageUrls = [];
 
+/**
+ * @type {Blob | null} Stores the raw ZIP file blob once fetched, so it can be downloaded.
+ */
+let recipeZipBlob = null; // New global variable to store the ZIP blob
+
 // --- Utility Functions ---
 
 /**
@@ -105,8 +110,9 @@ async function fetchRecipeData(id) {
         throw new Error(`Recette introuvable: ${id}.zip (Status: ${response.status})`);
     }
 
-    const zipBlob = await response.blob();
-    const zip = await JSZip.loadAsync(zipBlob);
+    // Store the raw ZIP blob for potential download later
+    recipeZipBlob = await response.blob();
+    const zip = await JSZip.loadAsync(recipeZipBlob); // Load from the stored blob
 
     // Extract JSON data
     const jsonFile = zip.file(`${id}.json`);
@@ -244,7 +250,7 @@ function updateDisplayedIngredients() {
             if (displayQuantity > 1 && !ingredientName.endsWith('s')) { // Simple pluralization
                 ingredientName += 's';
             }
-            ingredientText = `${displayQuantity} ${ingredientName}`;        
+            ingredientText = `${displayQuantity} ${ingredientName}`;
         } else {
             // Standard quantity and unit (e.g., "100 g de farine")
             let prefix = "de ";
@@ -352,17 +358,6 @@ window.onload = async () => {
         alert(`Erreur: ${error.message || "Impossible de charger la recette."}`);
     }
 
-    // Attach event listeners for guest count adjustments
-    const decreaseGuestsBtn = document.getElementById("decrease-guests");
-    const increaseGuestsBtn = document.getElementById("increase-guests");
-
-    if (decreaseGuestsBtn) {
-        decreaseGuestsBtn.addEventListener("click", () => adjustGuestCount(-1));
-    }
-    if (increaseGuestsBtn) {
-        increaseGuestsBtn.addEventListener("click", () => adjustGuestCount(1));
-    }
-
     // Attach event listeners for carousel navigation buttons
     const prevCarouselBtn = document.querySelector(".carousel-btn.left");
     const nextCarouselBtn = document.querySelector(".carousel-btn.right");
@@ -372,5 +367,23 @@ window.onload = async () => {
     }
     if (nextCarouselBtn) {
         nextCarouselBtn.addEventListener("click", nextImage);
+    }
+
+    const downloadButton = document.getElementById("download-recipe-btn");
+    if (downloadButton) {
+        downloadButton.addEventListener("click", () => {
+            if (recipeZipBlob) {
+                const url = URL.createObjectURL(recipeZipBlob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `${recipeId}.zip`; // Set the download file name
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url); // Clean up the URL object
+            } else {
+                alert("Le fichier de recette n'est pas encore disponible pour le téléchargement.");
+            }
+        });
     }
 };
