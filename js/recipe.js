@@ -90,6 +90,25 @@ function roundToNearestFiveCents(number) {
     return Math.round(number / 0.05) * 0.05;
 }
 
+/**
+ * Converts a Base64 data URL string to a Blob object.
+ * @param {string} base64 - The Base64 data URL string (e.g., "data:image/jpeg;base64,...").
+ * @returns {Blob} A Blob object.
+ */
+function base64ToBlob(base64) {
+    const parts = base64.split(';base64,');
+    const contentType = parts[0].split(':')[1];
+    const raw = window.atob(parts[1]);
+    const rawLength = raw.length;
+    const uInt8Array = new Uint8Array(rawLength);
+
+    for (let i = 0; i < rawLength; ++i) {
+        uInt8Array[i] = raw.charCodeAt(i);
+    }
+
+    return new Blob([uInt8Array], { type: contentType });
+}
+
 // --- Data Fetching and Processing ---
 
 /**
@@ -100,7 +119,30 @@ function roundToNearestFiveCents(number) {
  * @throws {Error} If the recipe ZIP file is not found or cannot be processed.
  */
 async function fetchRecipeData(id) {
-    // Ensure JSZip is available
+    // Check if the recipe exists in local storage
+    const storedRecipeData = localStorage.getItem(`recipe_${id}`);
+    if (storedRecipeData) {
+        const { recipe, imageBlobs, zipBlob: storedZipBlobBase64 } = JSON.parse(storedRecipeData); // Also destructure zipBlob if you saved it
+
+        if (!Array.isArray(imageBlobs)) {
+            recipe.imageBlobs = [];
+        } else {
+            const imageObjectUrls = await Promise.all(imageBlobs.map(async (base64String) => {
+                const blob = base64ToBlob(base64String); // Convert Base64 string to Blob
+                return URL.createObjectURL(blob); // Create Object URL from Blob
+            }));
+            recipe.imageBlobs = imageObjectUrls;
+        }
+
+        // Reconstruct the ZIP blob if it was saved (for download functionality)
+        if (storedZipBlobBase64) {
+            recipeZipBlob = base64ToBlob(storedZipBlobBase64);
+        }
+
+        return recipe;
+    }
+    
+    // If not in local storage, fetch from the predefined path
     if (typeof JSZip === 'undefined') {
         throw new Error("JSZip library is not loaded. Cannot fetch recipe data.");
     }
@@ -112,7 +154,7 @@ async function fetchRecipeData(id) {
 
     // Store the raw ZIP blob for potential download later
     recipeZipBlob = await response.blob();
-    const zip = await JSZip.loadAsync(recipeZipBlob); // Load from the stored blob
+    const zip = await JSZip.loadAsync(recipeZipBlob);
 
     // Extract JSON data
     const jsonFile = zip.file(`${id}.json`);
@@ -122,19 +164,25 @@ async function fetchRecipeData(id) {
     const jsonData = await jsonFile.async("text");
     const recipeData = JSON.parse(jsonData);
 
+    // Ensure recipeData.images is an array
+    if (!Array.isArray(recipeData.images)) {
+        recipeData.images = [];
+    }
+
     // Extract images and create Object URLs
-    const imageObjectUrls = {};
-    for (const imagePath of recipeData.images || []) { // Ensure images array exists
-        const imageFile = zip.file(imagePath); // Path might be "resources/image.jpg"
+    const imageObjectUrls = [];
+    for (const imagePath of recipeData.images) {
+        const imageFile = zip.file(imagePath);
         if (imageFile) {
             const blob = await imageFile.async("blob");
-            imageObjectUrls[imagePath] = URL.createObjectURL(blob);
+            const imageUrl = URL.createObjectURL(blob);
+            imageObjectUrls.push(imageUrl);
         } else {
             console.warn(`Image file not found in zip at path: ${imagePath}`);
         }
     }
 
-    recipeData.imageBlobs = Object.values(imageObjectUrls); // Store only the URLs for convenience
+    recipeData.imageBlobs = imageObjectUrls; // Ensure imageBlobs is always an array
     return recipeData;
 }
 
@@ -233,7 +281,7 @@ function updateDisplayedIngredients() {
         // Calculate scaled quantity
         const scaledQuantity = ing.unit !== "" ? (ing.quantity / recipeOriginalGuests) * guestCount : ing.quantity;
         // Round scaled quantity to nearest 0.5 (for common cooking measures)
-        const displayQuantity = roundToNearestFiveCents(scaledQuantity * 2) / 2;
+        const displayQuantity = Math.round(roundToNearestFiveCents(scaledQuantity) * 100) / 100;
 
         const calculatedPrice = ing.unit !== "" ? ing.price * guestCount : ing.price; // Price scaling directly with guest count
         totalCalculatedPrice += calculatedPrice;
@@ -382,8 +430,31 @@ window.onload = async () => {
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url); // Clean up the URL object
             } else {
-                alert("Le fichier de recette n'est pas encore disponible pour le téléchargement.");
+                // If recipeZipBlob is not available, try to get it from local storage
+                const storedRecipeData = localStorage.getItem(`recipe_${recipeId}`);
+                if (storedRecipeData) {
+                    const recipeData = JSON.parse(storedRecipeData);
+                    if (recipeData.zipBlob) {
+                        const blob = new Blob([recipeData.zipBlob]);
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `${recipeId}.zip`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    } else {
+                        alert("Le fichier de recette n'est pas encore disponible pour le téléchargement.");
+                    }
+                } else {
+                    alert("Le fichier de recette n'est pas encore disponible pour le téléchargement.");
+                }
             }
         });
     }
 };
+
+window.addEventListener('beforeunload', () => {
+    imageUrls.forEach(url => URL.revokeObjectURL(url));
+});

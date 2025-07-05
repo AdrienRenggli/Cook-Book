@@ -120,11 +120,11 @@ function createElement(tagName, className = '', attributes = {}) {
  */
 async function createRecipeCard(recipe, zip) {
     const card = createElement("div", "recipe");
-    const firstImageResource = recipe.images?.[0]; // Get the path to the first image
     let imageSrc = '';
 
-    if (firstImageResource) {
+    if (zip && recipe.images?.[0]) {
         try {
+            const firstImageResource = recipe.images[0];
             const imageFile = zip.file(firstImageResource);
             if (imageFile) {
                 const imageData = await imageFile.async('uint8array');
@@ -149,12 +149,16 @@ async function createRecipeCard(recipe, zip) {
             </div>
             <div class="content">
                 <h3>${recipe.title}</h3>
-                <p>
-                    Note : ${generateRatingIcons('fa-heart', recipe.rating)}
-                    <br>Difficulté : ${generateRatingIcons('fa-star', recipe.difficulty)}
-                    <br>Temps : ${timeDisplay}
-                    <br>Prix : ${calculatePricePerPerson(recipe).toFixed(2)} CHF / personne
-                </p>
+                <div class="recipe-details">
+                    <p>
+                        Note : ${generateRatingIcons('fa-heart', recipe.rating)}
+                        <br>Difficulté : ${generateRatingIcons('fa-star', recipe.difficulty)}
+                    </p>
+                    <p>
+                        Temps : ${timeDisplay}
+                        <br>Prix : ${calculatePricePerPerson(recipe).toFixed(2)} CHF / personne
+                    </p>
+                </div>
                 <div class="tags">
                     ${recipe.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                 </div>
@@ -162,13 +166,8 @@ async function createRecipeCard(recipe, zip) {
         </a>
     `;
 
-    // Revoke object URL after image is loaded to free up memory (important for many images)
-    // This needs to be handled carefully, as the image might not be fully rendered yet.
-    // A more robust solution might involve Intersection Observer or external image loading library.
-    // For now, we'll rely on the browser to eventually clean up, or a specific cleanup function.
+    // Revoke object URL after image is loaded to free up memory
     if (imageSrc) {
-        // A small delay to allow image rendering, but not ideal for large scale
-        // A better approach would be to listen for the image's 'load' event
         setTimeout(() => URL.revokeObjectURL(imageSrc), 5000);
     }
 
@@ -259,8 +258,6 @@ function updateFilterToggleIcon() {
  * and updates the UI accordingly.
  */
 function resetAllFilters() {
-    currentSearchTerm = "";
-    searchInput.value = ""; // Clear search input visually
 
     activeTags.clear();
     document.querySelectorAll(".filter.active").forEach(btn => btn.classList.remove("active"));
@@ -378,17 +375,195 @@ async function loadAllRecipes() {
     filterAndDisplayRecipes(); // Display all recipes initially after loading
 }
 
+// --- Drag and Drop Functionality ---
+
+/**
+ * Sets up event listeners for drag-and-drop functionality.
+ */
+function setupDragAndDrop() {
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const browseFilesButton = document.getElementById('browse-files');
+
+    // Highlight drop zone when item is dragged over it
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('highlight');
+    });
+
+    // Remove highlight when item is dragged away
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('highlight');
+    });
+
+    // Handle dropped files
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('highlight');
+        const files = e.dataTransfer.files;
+        handleFiles(files);
+    });
+
+    // Handle files selected via file input
+    fileInput.addEventListener('change', (e) => {
+        const files = e.target.files;
+        handleFiles(files);
+    });
+
+    // Trigger file input when browse button is clicked
+    browseFilesButton.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    // Also allow clicking on the drop zone to open file dialog
+    dropZone.addEventListener('click', () => {
+        fileInput.click();
+    });
+}
+
+/**
+ * Handles the files selected via drag-and-drop or file input.
+ * @param {FileList} files - The list of files to handle.
+ */
+async function handleFiles(files) {
+    for (const file of files) {
+        if (file.name.endsWith('.zip')) {
+            try {
+                const recipeData = await loadRecipeFromZip(file);
+
+                // Ensure imageBlobs is defined and is an array
+                if (!Array.isArray(recipeData.recipe.imageBlobs)) {
+                    recipeData.recipe.imageBlobs = [];
+                }
+
+                // Convert image blobs to Base64 strings
+                const imageBlobsBase64 = await Promise.all(recipeData.recipe.imageBlobs.map(async (blobUrl) => {
+                    const response = await fetch(blobUrl);
+                    const blob = await response.blob();
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+                }));
+
+                // Store the recipe data and image blobs in local storage
+                localStorage.setItem(`recipe_${recipeData.recipe.id}`, JSON.stringify({
+                    recipe: recipeData.recipe,
+                    imageBlobs: imageBlobsBase64,
+                    zipBlob: await recipeData.zip.generateAsync({ type: 'blob' }).then(blob => {
+                        return new Promise(resolve => { // Convert zipBlob to Base64 too
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        });
+                    })
+                }));
+                recipes.push(recipeData);
+            } catch (error) {
+                console.error(`Error loading recipe from ${file.name}:`, error);
+            }
+        }
+    }
+    filterAndDisplayRecipes();
+}
+
+
+/**
+ * Loads a recipe from a ZIP file and adds it to the recipes array.
+ * @param {File} zipFile - The ZIP file to load.
+ */
+async function loadRecipeFromZip(zipFile) {
+    try {
+        const zip = await JSZip.loadAsync(zipFile);
+
+        // Look for a JSON file in the ZIP
+        const jsonFileName = zipFile.name.replace('.zip', '.json');
+        const jsonFile = zip.file(jsonFileName);
+
+        if (!jsonFile) {
+            throw new Error(`JSON file not found in zip: ${jsonFileName}`);
+        }
+
+        const text = await jsonFile.async("text");
+        const recipe = JSON.parse(text);
+
+        // Ensure recipe.images is an array
+        if (!Array.isArray(recipe.images)) {
+            recipe.images = [];
+        }
+
+        // Create Object URLs for images
+        const imageObjectUrls = [];
+        for (const imagePath of recipe.images) {
+            const imageFile = zip.file(imagePath);
+            if (imageFile) {
+                const blob = await imageFile.async("blob");
+                const imageUrl = URL.createObjectURL(blob);
+                imageObjectUrls.push(imageUrl);
+            } else {
+                console.warn(`Image file not found in zip at path: ${imagePath}`);
+            }
+        }
+
+        recipe.imageBlobs = imageObjectUrls; // Ensure imageBlobs is always an array
+
+        return { recipe, zip };
+    } catch (error) {
+        console.error(`Error loading recipe from ${zipFile.name}:`, error);
+        throw error;
+    }
+}
+
+/**
+ * Saves the current recipes to local storage.
+ */
+function saveRecipesToLocalStorage() {
+    const recipesToSave = recipes.map(recipeData => ({
+        recipe: recipeData.recipe,
+        // We can't save the JSZip object directly, so we'll just save the recipe data
+        // The images will need to be reloaded from the ZIP file when the page is refreshed
+    }));
+    localStorage.setItem('localRecipes', JSON.stringify(recipesToSave));
+}
+
+/**
+ * Loads recipes from local storage and adds them to the recipes array.
+ */
+async function loadRecipesFromLocalStorage() {
+    const savedRecipes = localStorage.getItem('localRecipes');
+    if (savedRecipes) {
+        const parsedRecipes = JSON.parse(savedRecipes);
+        for (const recipeData of parsedRecipes) {
+            try {
+                // Here you would typically reload the ZIP file and create a JSZip instance
+                // For simplicity, we're just adding the recipe data without the ZIP
+                // In a real application, you would need to handle the ZIP file loading properly
+                recipes.push({ recipe: recipeData.recipe, zip: null });
+            } catch (error) {
+                console.error(`Error loading recipe from local storage:`, error);
+            }
+        }
+    }
+}
 
 // --- Initialization ---
 
 /**
  * Initializes the application once the DOM is fully loaded.
  */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Set up all filter controls and input listeners
+    await loadRecipesFromLocalStorage();
+
     setupFilterControls();
     setupInputFilters();
+    setupDragAndDrop();
 
     // Load all recipe data
     loadAllRecipes();
+});
+
+window.addEventListener('beforeunload', () => {
+    imageUrls.forEach(url => URL.revokeObjectURL(url));
 });
