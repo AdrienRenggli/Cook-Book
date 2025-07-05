@@ -184,8 +184,9 @@ function buildRecipe() {
     const ingredients = Array.from(document.querySelectorAll("#ingredient-list li")).map(li => {
         const quantity = parseFloat(li.children[1].value || 0);
         const price = round(parseFloat(li.children[3].value || 0) / guests).toFixed(2);
+        const name = li.children[0].value;
         return {
-            name: li.children[0].value,
+            name: name.charAt(0).toUpperCase() + name.slice(1),
             quantity: quantity.toFixed(2),
             unit: li.children[2].value,
             price: round(price),
