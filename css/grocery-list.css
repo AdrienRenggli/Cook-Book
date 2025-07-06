@@ -1,0 +1,198 @@
+/* css/grocery-list.css */
+
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #fff8f5;
+    color: #6b4c3b;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    background-color: #ffe3dc;
+    color: #ff6f61;
+    padding: 1rem 20px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.back-button {
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+    color: #ff6f61;
+    text-decoration: none;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 25px;
+    background-color: #ffeadf;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    border: 1px solid #ff918c;
+}
+
+.back-button:hover {
+    background-color: #ffd4c6;
+}
+
+main.grocery-list-container {
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 25px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    flex-grow: 1;
+    border: 2px solid #ffa4a0;
+}
+
+.add-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+#new-item-input {
+    flex-grow: 1;
+    padding: 12px 18px;
+    border: 2px solid #ffa4a0;
+    border-radius: 25px;
+    font-size: 1em;
+    color: #6b4c3b;
+    background-color: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    box-sizing: border-box;
+}
+
+#new-item-input:focus {
+    outline: none;
+    border-color: #ff6f61;
+    box-shadow: 0 0 0 3px rgba(255, 111, 97, 0.2);
+}
+
+#add-item-button {
+    background-color: #ff6f61;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+#add-item-button:hover {
+    background-color: #ff918c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+#add-item-button i {
+    font-size: 1.1em;
+}
+
+#grocery-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#grocery-items li {
+    display: flex;
+    align-items: center;
+    background-color: #fffaf9;
+    border: 1px solid #ffe5e0;
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#grocery-items li.checked {
+    background-color: #fceceb;
+    text-decoration: line-through;
+    color: #997d74;
+    opacity: 0.8;
+}
+
+#grocery-items li input[type="checkbox"] {
+    margin-right: 15px;
+    width: 20px;
+    height: 20px;
+    accent-color: #ff6f61;
+    cursor: pointer;
+    border: 1px solid #ff918c;
+    border-radius: 4px;
+}
+
+#grocery-items li input[type="checkbox"]:checked {
+    border: none;
+}
+
+#grocery-items li span {
+    flex-grow: 1;
+    word-break: break-word;
+}
+
+.remove-item {
+    background: none;
+    border: none;
+    color: #e06060;
+    cursor: pointer;
+    font-size: 1.2em;
+    margin-left: 15px;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.remove-item:hover {
+    background-color: #ffd4c6;
+    color: #b33d3d;
+}
+
+.clear-button {
+    display: block;
+    width: fit-content;
+    margin: 30px auto 0 auto;
+    background-color: #e06060;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 12px 25px;
+    cursor: pointer;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.clear-button:hover {
+    background-color: #c94a4a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}

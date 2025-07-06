@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Liste de Courses</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+        <link rel="stylesheet" href="css/grocery-list.css" />
+    </head>
+    <body>
+        <header>
+            <h1>Liste de Courses</h1>
+            <a href="index.html" class="back-button"><i class="fa-solid fa-arrow-left"></i> Retour aux recettes</a>
+        </header>
+
+        <main class="grocery-list-container">
+            <div class="add-item">
+                <input type="text" id="new-item-input" placeholder="Ajouter un article..." />
+                <button id="add-item-button"><i class="fa-solid fa-plus"></i> Ajouter</button>
+            </div>
+
+            <ul id="grocery-items">
+                </ul>
+
+            <button id="clear-all-button" class="clear-button"><i class="fa-solid fa-trash"></i> Effacer tout</button>
+        </main>
+
+        <script src="js/groceryList.js"></script>
+    </body>
+</html>

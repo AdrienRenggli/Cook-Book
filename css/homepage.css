@@ -1,4 +1,5 @@
-/* General Styles */
+/* css/homepage.css */
+
 body {
     font-family: sans-serif;
     margin: 0;
@@ -16,7 +17,32 @@ header {
     position: sticky;
     top: 0;
     z-index: 10;
+    position: relative;
+
 }
+
+.grocery-list-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #ff918c;
+    color: #333;
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 1.2em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.grocery-list-button:hover {
+    background-color: #ff6f61;
+    transform: translateY(-1px);
+}
+
 
 .app-title {
     font-size: 2.5rem;

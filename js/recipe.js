@@ -37,7 +37,7 @@ let imageUrls = [];
 /**
  * @type {Blob | null} Stores the raw ZIP file blob once fetched, so it can be downloaded.
  */
-let recipeZipBlob = null; // New global variable to store the ZIP blob
+let recipeZipBlob = null;
 
 // --- Utility Functions ---
 
@@ -122,14 +122,14 @@ async function fetchRecipeData(id) {
     // Check if the recipe exists in local storage
     const storedRecipeData = localStorage.getItem(`recipe_${id}`);
     if (storedRecipeData) {
-        const { recipe, imageBlobs, zipBlob: storedZipBlobBase64 } = JSON.parse(storedRecipeData); // Also destructure zipBlob if you saved it
+        const { recipe, imageBlobs, zipBlob: storedZipBlobBase64 } = JSON.parse(storedRecipeData);
 
         if (!Array.isArray(imageBlobs)) {
             recipe.imageBlobs = [];
         } else {
             const imageObjectUrls = await Promise.all(imageBlobs.map(async (base64String) => {
-                const blob = base64ToBlob(base64String); // Convert Base64 string to Blob
-                return URL.createObjectURL(blob); // Create Object URL from Blob
+                const blob = base64ToBlob(base64String);
+                return URL.createObjectURL(blob);
             }));
             recipe.imageBlobs = imageObjectUrls;
         }
@@ -141,7 +141,7 @@ async function fetchRecipeData(id) {
 
         return recipe;
     }
-    
+
     // If not in local storage, fetch from the predefined path
     if (typeof JSZip === 'undefined') {
         throw new Error("JSZip library is not loaded. Cannot fetch recipe data.");
@@ -182,7 +182,7 @@ async function fetchRecipeData(id) {
         }
     }
 
-    recipeData.imageBlobs = imageObjectUrls; // Ensure imageBlobs is always an array
+    recipeData.imageBlobs = imageObjectUrls;
     return recipeData;
 }
 
@@ -260,22 +260,24 @@ function nextImage() {
     }
 }
 
-
 // --- Ingredient and Guest Management ---
 
 /**
  * Updates the displayed ingredient list and total price based on the current `guestCount`.
  * Ingredient quantities are scaled proportionally from `baseIngredients`.
+ * This function also returns the *display text* of the ingredients for the grocery list.
+ * @returns {Array<string>} An array of formatted ingredient strings.
  */
 function updateDisplayedIngredients() {
     const ingredientListElement = document.getElementById("ingredient-list");
     if (!ingredientListElement) {
         console.error("Ingredient list element not found.");
-        return;
+        return [];
     }
     ingredientListElement.innerHTML = ""; // Clear existing list
 
     let totalCalculatedPrice = 0;
+    const ingredientsForGroceryList = []; // Array to store formatted ingredient strings
 
     baseIngredients.forEach(ing => {
         // Calculate scaled quantity
@@ -303,7 +305,7 @@ function updateDisplayedIngredients() {
             // Standard quantity and unit (e.g., "100 g de farine")
             let prefix = "de ";
             const vowels = ['a', 'e', 'i', 'o', 'u', 'y'];
-            if (vowels.includes(ing.name[0]?.toLowerCase())) { // Check for first letter vowel
+            if (vowels.includes(ing.name[0]?.toLowerCase())) {
                 prefix = "d'";
             }
             const unit = (ing.unit === "gousse" && displayQuantity > 1) ? ing.unit + 's' : ing.unit;
@@ -312,6 +314,7 @@ function updateDisplayedIngredients() {
         }
         li.textContent = ingredientText;
         ingredientListElement.appendChild(li);
+        ingredientsForGroceryList.push(ingredientText); // Add formatted string to array
     });
 
     // Update total price display
@@ -325,6 +328,8 @@ function updateDisplayedIngredients() {
     if (guestCountElement) {
         guestCountElement.textContent = guestCount;
     }
+
+    return ingredientsForGroceryList; // Return the list of formatted ingredients
 }
 
 /**
@@ -336,6 +341,45 @@ function changeGuests(delta) {
     guestCount = Math.max(1, guestCount + delta);
     updateDisplayedIngredients();
 }
+
+// --- Grocery List Integration ---
+
+/**
+ * Adds all currently displayed ingredients to the grocery list in local storage.
+ */
+function addIngredientsToGroceryList() {
+    // Get the current list of formatted ingredients directly from the displayed elements
+    const ingredientsToAdd = Array.from(document.querySelectorAll('#ingredient-list li')).map(li => li.textContent);
+
+    if (ingredientsToAdd.length === 0) {
+        alert("Aucun ingrédient à ajouter à la liste de courses.");
+        return;
+    }
+
+    try {
+        const existingListJSON = localStorage.getItem('groceryList');
+        let groceryList = existingListJSON ? JSON.parse(existingListJSON) : [];
+
+        ingredientsToAdd.forEach(ingredientText => {
+            // Add only if not already present (case-insensitive, trim whitespace)
+            const exists = groceryList.some(item => item.text.trim().toLowerCase() === ingredientText.trim().toLowerCase());
+            if (!exists) {
+                groceryList.push({ text: ingredientText, checked: false });
+            }
+        });
+
+        localStorage.setItem('groceryList', JSON.stringify(groceryList));
+        alert("Ingrédients ajoutés à la liste de courses !");
+
+        // Optional: Redirect to grocery list page after adding
+        // window.location.href = 'grocery-list.html';
+
+    } catch (error) {
+        console.error("Erreur lors de l'ajout des ingrédients à la liste de courses:", error);
+        alert("Impossible d'ajouter les ingrédients à la liste de courses. Veuillez réessayer.");
+    }
+}
+
 
 // --- Page Initialization ---
 
@@ -366,12 +410,33 @@ function renderRecipeDetails(recipeData) {
     setTextContent("guest-count", guestCount); // Initial guest count display
 
     setInnerHTML("instructions", renderTextAsParagraphs(recipeData.instructions));
-    setInnerHTML("tips", renderTextAsParagraphs(recipeData.tips));
+
+    // Handle "Conseils du chef" section visibility
+    const tipsContent = renderTextAsParagraphs(recipeData.tips);
+    const tipsSection = document.querySelector("section.tips");
+    const tipsElement = document.getElementById("tips");
+
+    if (tipsSection && tipsElement) {
+        if (tipsContent.trim() === '') {
+            tipsSection.style.display = 'none'; // Hide the entire section if no content
+        } else {
+            tipsSection.style.display = 'block'; // Ensure it's visible if content exists
+            tipsElement.innerHTML = tipsContent;
+        }
+    }
+
 
     const cookElement = document.getElementById("cook");
     if (cookElement) {
-        cookElement.innerHTML = `
-            Recette proposée par <a href="${recipeData.url}" target="_blank" rel="noopener noreferrer">${recipeData.cook}</a>`;
+        // Ensure recipeData.url is not empty before creating a link
+        if (recipeData.url && recipeData.cook) {
+            cookElement.innerHTML = `
+                Recette proposée par <a href="${recipeData.url}" target="_blank" rel="noopener noreferrer">${recipeData.cook}</a>`;
+        } else if (recipeData.cook) {
+            cookElement.textContent = `Recette proposée par ${recipeData.cook}`;
+        } else {
+            cookElement.textContent = `Recette proposée par un Chef inconnu`; // Fallback
+        }
     }
 
     // Store base ingredients and update the display
@@ -434,8 +499,9 @@ window.onload = async () => {
                 const storedRecipeData = localStorage.getItem(`recipe_${recipeId}`);
                 if (storedRecipeData) {
                     const recipeData = JSON.parse(storedRecipeData);
+                    // Check if zipBlob is stored as Base64 in local storage
                     if (recipeData.zipBlob) {
-                        const blob = new Blob([recipeData.zipBlob]);
+                        const blob = base64ToBlob(recipeData.zipBlob); // Convert Base64 back to Blob
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement("a");
                         a.href = url;
@@ -445,13 +511,19 @@ window.onload = async () => {
                         document.body.removeChild(a);
                         URL.revokeObjectURL(url);
                     } else {
-                        alert("Le fichier de recette n'est pas encore disponible pour le téléchargement.");
+                        alert("Le fichier de recette n'est pas disponible pour le téléchargement depuis le stockage local.");
                     }
                 } else {
-                    alert("Le fichier de recette n'est pas encore disponible pour le téléchargement.");
+                    alert("Le fichier de recette n'est pas disponible pour le téléchargement.");
                 }
             }
         });
+    }
+
+    // Attach event listener for the new "Add to Grocery List" button
+    const addToListButton = document.getElementById("add-to-grocery-list-btn");
+    if (addToListButton) {
+        addToListButton.addEventListener("click", addIngredientsToGroceryList);
     }
 };
 
