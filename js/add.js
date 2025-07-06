@@ -575,14 +575,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set up the drag and drop area for archives
     setupArchiveDropArea();
 
-    // Attach event listener for adding ingredients (assuming a button exists with this ID)
-    const addIngredientBtn = document.querySelector('button[onclick="addIngredient()"]'); // Select by onclick attribute
+    // Attach event listener for adding ingredients
+    const addIngredientBtn = document.getElementById('add-ingredient-btn');
     if (addIngredientBtn) {
         addIngredientBtn.addEventListener('click', addIngredient);
     }
 
-    // Assuming there is an export button, add an event listener for it
-    const exportButton = document.querySelector('button[onclick="exportRecipe()"]'); // Select by onclick attribute
+    // Attach event listener for the export button
+    const exportButton = document.getElementById('export-recipe-button');
     if (exportButton) {
         exportButton.addEventListener('click', exportRecipe);
     }
@@ -590,9 +590,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // Call updateTotalPriceDisplay once at the start to ensure initial price is calculated
     updateTotalPriceDisplay();
 });
-
-// Assuming there is an export button, add an event listener for it
-const exportButton = document.getElementById('export-recipe-button'); // Assuming a button with this ID
-if (exportButton) {
-    exportButton.addEventListener('click', exportRecipe);
-}
