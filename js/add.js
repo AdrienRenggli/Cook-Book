@@ -283,6 +283,177 @@ function setupImageDropArea() {
     imageSection.appendChild(dropArea);
 }
 
+// --- Recipe Import and Edit
+
+/**
+ * Handles the dropping or selection of a ZIP archive.
+ * Extracts recipe data and images from the archive and populates the form.
+ * @param {DragEvent | Event} e - The event object (DragEvent for drop, Event for change).
+ */
+async function handleRecipeArchive(e) {
+    const files = Array.from(e.dataTransfer ? e.dataTransfer.files : e.target.files);
+    const zipFile = files.find(file => file.name.endsWith('.zip'));
+
+    if (!zipFile) {
+        alert("Veuillez fournir une archive .zip de recette valide.");
+        return;
+    }
+
+    if (typeof JSZip === 'undefined') {
+        console.error("JSZip library is not loaded. Cannot import recipe.");
+        alert("JSZip library is required for importing recipes. Please ensure it's linked.");
+        return;
+    }
+
+    try {
+        const zip = await JSZip.loadAsync(zipFile);
+        let recipeData = null;
+        imageFiles = []; // Clear existing images
+
+        // Find the JSON recipe file
+        zip.forEach((relativePath, zipEntry) => {
+            if (relativePath.endsWith('.json') && !zipEntry.dir) {
+                recipeData = zipEntry;
+            }
+        });
+
+        if (!recipeData) {
+            alert("Pas de recette JSON trouvé dans l'archive.");
+            return;
+        }
+
+        // Load and parse the JSON data
+        const recipeJsonString = await recipeData.async("string");
+        const recipe = JSON.parse(recipeJsonString);
+
+        // Populate the form with recipe data
+        populateFormWithRecipe(recipe);
+
+        // Load images from the 'resources' folder in the zip
+        const resourceFolder = zip.folder("resources");
+        if (resourceFolder) {
+            const imagePromises = [];
+            resourceFolder.forEach((relativePath, zipEntry) => {
+                if (!zipEntry.dir && zipEntry.name.startsWith("resources/") && (zipEntry.name.endsWith('.jpg') || zipEntry.name.endsWith('.jpeg') || zipEntry.name.endsWith('.png') || zipEntry.name.endsWith('.gif'))) {
+                    imagePromises.push(
+                        zipEntry.async("base64").then(data => {
+                            imageFiles.push({
+                                name: zipEntry.name.split('/').pop(), // Get just the filename
+                                data: data
+                            });
+                        })
+                    );
+                }
+            });
+            await Promise.all(imagePromises);
+        }
+        updateImagePreviews(); // Display the loaded images
+        updateTotalPriceDisplay(); // Recalculate price based on loaded ingredients
+
+        alert("Recette chargée avec succès !");
+
+    } catch (error) {
+        console.error("Error loading recipe archive:", error);
+        alert("Erreur lors du chargement de l'archive de la rectte. Veuillez vous assurer qu'il s'agit d'une archive valide.");
+    }
+}
+
+/**
+ * Populates the form fields with data from a given recipe object.
+ * @param {Object} recipe - The recipe object to load into the form.
+ */
+function populateFormWithRecipe(recipe) {
+    // Clear existing ingredients first
+    const ingredientList = document.getElementById("ingredient-list");
+    if (ingredientList) {
+        ingredientList.innerHTML = '';
+    }
+
+    // Set simple text/number inputs
+    document.getElementById('recipe-title').value = recipe.title || '';
+    document.getElementById('prep-time').value = recipe.prepTime || '';
+    document.getElementById('cook-time').value = recipe.cookTime || '';
+    document.getElementById('guests').value = recipe.guests || '';
+    document.getElementById('instructions').value = recipe.instructions || '';
+    document.getElementById('tips').value = recipe.tips || '';
+    document.getElementById('cook').value = recipe.cook || '';
+    document.getElementById('url').value = recipe.url || '';
+
+    // Set checkbox
+    document.getElementById('rest').checked = recipe.rest || false;
+
+    // Set ratings
+    setAndDisplayRating("rating", recipe.rating || 5);
+    setAndDisplayRating("difficulty", recipe.difficulty || 5);
+
+    // Set tags
+    document.getElementById('tags').value = recipe.tags ? recipe.tags.join(', ') : '';
+
+    // Set ingredients
+    if (recipe.ingredients && Array.isArray(recipe.ingredients)) {
+        recipe.ingredients.forEach(ingredient => {
+            const li = createElement("li");
+            li.innerHTML = `
+                <input placeholder="Nom de l'ingrédient" value="${ingredient.name || ''}" />
+                <input type="number" placeholder="Quantité" min="0" value="${ingredient.quantity || ''}" />
+                <input placeholder="Unité (g, ml, etc.) '.' pour unité" value="${ingredient.unit || ''}" />
+                <input type="number" placeholder="Prix" min="0" value="${(ingredient.price * (recipe.guests || 1)) || ''}" />
+            `;
+            ingredientList.appendChild(li);
+            li.querySelectorAll("input").forEach(inputElement => inputElement.addEventListener("input", updateTotalPriceDisplay));
+        });
+    }
+
+    // Ensure at least one empty ingredient row if none were loaded
+    if (ingredientList.children.length === 0) {
+        addIngredient();
+    }
+}
+
+/**
+ * Sets up the drag-and-drop area for recipe archive uploads.
+ */
+function setupArchiveDropArea() {
+    const footer = document.querySelector("footer.credits");
+    if (!footer) {
+        console.error("Footer element not found for archive drop area.");
+        return;
+    }
+
+    const dropAreaContainer = createElement("div", "archive-drop-container");
+    dropAreaContainer.innerHTML = "<h3>Importer une recette archivée</h3>";
+
+    const dropArea = createElement("div", "drop-area archive-drop-area");
+    dropArea.innerHTML = "<p>Glissez-déposez un fichier ZIP de recette ici ou cliquez pour le sélectionner</p>";
+
+    const input = createElement("input", '', { type: "file", accept: ".zip", multiple: false });
+    dropArea.appendChild(input);
+
+    dropArea.addEventListener("click", () => input.click());
+
+    ['dragenter', 'dragover'].forEach(eventName => dropArea.addEventListener(eventName, (ev) => {
+        ev.preventDefault();
+        dropArea.classList.add("highlight");
+    }));
+
+    ['dragleave', 'drop'].forEach(eventName => dropArea.addEventListener(eventName, (ev) => {
+        ev.preventDefault();
+        dropArea.classList.remove("highlight");
+    }));
+
+    dropArea.addEventListener("drop", handleRecipeArchive);
+    input.addEventListener("change", handleRecipeArchive);
+
+    // Insert the new drop area before the existing "Proposez votre recette" section
+    const proposeRecipeHeading = footer.querySelector('h3'); // Find the first h3, which is "Proposez votre recette"
+    if (proposeRecipeHeading) {
+        dropAreaContainer.appendChild(dropArea);
+        footer.insertBefore(dropAreaContainer, proposeRecipeHeading);
+    } else {
+        footer.appendChild(dropArea); // Fallback if heading not found
+    }
+}
+
 // --- Recipe Building and Export ---
 
 /**
@@ -374,13 +545,16 @@ async function exportRecipe() {
         URL.revokeObjectURL(downloadLink.href); // Clean up the object URL
     } catch (error) {
         console.error("Error generating or downloading zip file:", error);
-        alert("Failed to export recipe. Please try again.");
+        alert("Une erreur est survenue lors de l'exportation de la recette, Veuillez réessayer.");
     }
 }
 
 // --- Event Listeners and Initializations ---
 
+// Modify the DOMContentLoaded event listener to include the new setup
 document.addEventListener('DOMContentLoaded', () => {
+    // ... existing initializations ...
+
     // Initialize star ratings
     createStarRating("rating", 5);
     createStarRating("difficulty", 5);
@@ -398,11 +572,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set up the drag and drop area for images
     setupImageDropArea();
 
+    // Set up the drag and drop area for archives
+    setupArchiveDropArea();
+
     // Attach event listener for adding ingredients (assuming a button exists with this ID)
-    const addIngredientBtn = document.getElementById('add-ingredient-btn'); // Assuming a button with this ID
+    const addIngredientBtn = document.querySelector('button[onclick="addIngredient()"]'); // Select by onclick attribute
     if (addIngredientBtn) {
         addIngredientBtn.addEventListener('click', addIngredient);
     }
+
+    // Assuming there is an export button, add an event listener for it
+    const exportButton = document.querySelector('button[onclick="exportRecipe()"]'); // Select by onclick attribute
+    if (exportButton) {
+        exportButton.addEventListener('click', exportRecipe);
+    }
+
+    // Call updateTotalPriceDisplay once at the start to ensure initial price is calculated
+    updateTotalPriceDisplay();
 });
 
 // Assuming there is an export button, add an event listener for it

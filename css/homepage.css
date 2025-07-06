@@ -205,10 +205,15 @@ main#recipe-list {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10rem;
-    color: #ff6f61;
     cursor: pointer;
     text-decoration: none;
+    color: #6b4c3b;
+}
+
+.add-new i {
+    font-size: 10rem;
+    color: #ff6f61;
+
 }
 
 .drop-zone {
