@@ -99,4 +99,5 @@ Un grand merci aux contributeurs et aux designers :
     - [Adrien Renggli](https://github.com/AdrienRenggli)
     - [Dylan Callahan](https://github.com/cldylan)
     - Vicky Chappuis
+    - Une 4e personne souhaitant rerster anonyme.
 
