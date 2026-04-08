@@ -7,5 +7,6 @@ export const recipeFiles = [
     "Chouquettes_Parmesan_Jambon_Sauge",
     "Flemme-Kueche",
     "Tarte_au_flan",
+    "Pudding_sain_à_la_vanille",
     // Add other recipe filenames here
 ];
